@@ -20,6 +20,8 @@ app.get('/api/health', (req, res) => {
 // Registrar rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/budget', budgetRoutes);
+app.use('/api/auxiliary', require('./src/routes/auxiliaryRoutes'));
+app.use('/api/investments', require('./src/routes/investmentsRoutes'));
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

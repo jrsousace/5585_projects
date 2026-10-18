@@ -29,6 +29,32 @@ const appState = {
     this.user = null;
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
+  },
+
+  // Helper central para requisições autenticadas (Fase 3)
+  async fetchAuth(endpoint, options = {}) {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Não autenticado');
+
+    const defaultHeaders = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers
+      }
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Erro HTTP: ${res.status}`);
+    }
+
+    return res.json();
   }
 };
 

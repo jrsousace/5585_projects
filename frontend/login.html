@@ -53,10 +53,34 @@
         <div class="form-group">
           <label class="form-label" for="password">Senha</label>
           <input type="password" id="password" name="password" required placeholder="••••••••">
-          <div id="login-error" class="error-message">Credenciais inválidas. Tente admin@teste.com / admin123</div>
+          <div id="login-error" class="error-message">Credenciais inválidas.</div>
         </div>
         
         <button type="submit" class="btn mt-4">Entrar</button>
+        <button type="button" class="btn btn-outline mt-4" style="margin-top: 10px;" id="btn-show-register">Criar Conta</button>
+      </form>
+
+      <!-- Formulário de Registro (Inicia Escondido) -->
+      <form id="register-form" style="display: none;">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Nome Completo</label>
+          <input type="text" id="reg-name" required placeholder="Seu Nome">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="reg-email">E-mail</label>
+          <input type="email" id="reg-email" required placeholder="seu@email.com">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Senha</label>
+          <input type="password" id="reg-password" required placeholder="••••••••">
+          <div id="register-error" class="error-message">Erro ao criar conta.</div>
+          <div id="register-success" class="error-message" style="color: var(--success-color);">Conta criada com sucesso! Faça login.</div>
+        </div>
+        
+        <button type="submit" class="btn mt-4">Registrar</button>
+        <button type="button" class="btn btn-outline mt-4" style="margin-top: 10px;" id="btn-show-login">Já tenho conta</button>
       </form>
     </div>
   </div>

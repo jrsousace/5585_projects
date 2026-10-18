@@ -1,33 +1,67 @@
-// const db = require('../config/db');
+const db = require('../config/db');
 
 exports.getTransactions = async (req, res) => {
   try {
-    // No ambiente real, faríamos a busca no DB:
-    // const { rows } = await db.query('SELECT * FROM vw_transacoes WHERE id_usuario = $1', [req.user.id]);
+    const userId = req.user.userId;
     
-    // Retorno hardcoded para validar o fluxo real Backend -> Frontend
-    const mockDataFromAPI = [
-      {
-        id_transacao: 'uuid-db-1',
-        data_evento: '2023-11-01',
-        descricao: 'Internet (API Real)',
-        categoria: 'Despesas Fixas',
-        valor_total: 100.00,
-        tipo: 'despesa'
-      },
-      {
-        id_transacao: 'uuid-db-2',
-        data_evento: '2023-11-05',
-        descricao: 'Rendimento (API Real)',
-        categoria: 'Investimentos',
-        valor_total: 1500.00,
-        tipo: 'receita'
-      }
-    ];
-
-    res.json(mockDataFromAPI);
+    // Busca transações fazendo join para pegar nome da categoria/descrição/conta
+    const query = `
+      SELECT 
+        t.id_transacao, 
+        t.data_evento, 
+        t.valor_total, 
+        t.tipo, 
+        t.status,
+        d.descricao, 
+        c.nome_categoria as categoria,
+        fp.forma_pagamento
+      FROM Transacoes t
+      LEFT JOIN Descricao d ON t.id_descricao = d.id_descricao
+      LEFT JOIN Categoria c ON d.id_categoria = c.id_categoria
+      LEFT JOIN Forma_Pagamento fp ON t.id_forma_pg = fp.id_forma_pg
+      WHERE t.usuario_insercao = $1
+      ORDER BY t.data_evento DESC
+    `;
+    
+    const { rows } = await db.query(query, [userId]);
+    res.json(rows);
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
     res.status(500).json({ message: 'Erro ao buscar dados do orçamento' });
+  }
+};
+
+exports.createTransaction = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { data_evento, competencia, valor_total, tipo, status, descricao, id_categoria, id_forma_pg, id_conta } = req.body;
+
+    // 1. Inserir ou buscar a Descrição (para manter a integridade da modelagem)
+    let idDescricao = null;
+    if (descricao) {
+      // Tenta achar descrição existente para esta categoria, ou cria uma nova
+      const descResult = await db.query(
+        'INSERT INTO Descricao (descricao, id_categoria, usuario_criacao) VALUES ($1, $2, $3) RETURNING id_descricao',
+        [descricao, id_categoria, userId]
+      );
+      idDescricao = descResult.rows[0].id_descricao;
+    }
+
+    // 2. Inserir a Transação
+    const insertQuery = `
+      INSERT INTO Transacoes 
+        (usuario_insercao, data_evento, competencia, id_descricao, valor_total, tipo, status, id_forma_pg, id_conta)
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `;
+    const { rows } = await db.query(insertQuery, [
+      userId, data_evento, competencia, idDescricao, valor_total, tipo, status, id_forma_pg, id_conta
+    ]);
+
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar transação:', error);
+    res.status(500).json({ message: 'Erro ao registrar a transação' });
   }
 };

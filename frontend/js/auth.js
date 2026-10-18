@@ -2,8 +2,65 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
   const errorMsg = document.getElementById('login-error');
+  
+  const btnShowRegister = document.getElementById('btn-show-register');
+  const btnShowLogin = document.getElementById('btn-show-login');
 
+  // Alternar entre Login e Registro
+  if (btnShowRegister && btnShowLogin) {
+    btnShowRegister.addEventListener('click', () => {
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+    });
+    btnShowLogin.addEventListener('click', () => {
+      registerForm.style.display = 'none';
+      loginForm.style.display = 'block';
+    });
+  }
+
+  // --- LÓGICA DE REGISTRO ---
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const nome = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      
+      const regError = document.getElementById('register-error');
+      const regSuccess = document.getElementById('register-success');
+      regError.style.display = 'none';
+      regSuccess.style.display = 'none';
+      
+      try {
+        if (CONFIG.USE_MOCKS) {
+          throw new Error('Registro não disponível no modo Mock. Use admin@teste.com para entrar.');
+        }
+
+        const res = await fetch(`${CONFIG.API_BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, password })
+        });
+        
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.message || 'Erro ao registrar');
+        }
+        
+        regSuccess.style.display = 'block';
+        setTimeout(() => btnShowLogin.click(), 2000); // Volta pro login após sucesso
+        
+      } catch (error) {
+        regError.style.display = 'block';
+        regError.textContent = error.message;
+      }
+    });
+  }
+
+  // --- LÓGICA DE LOGIN ---
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();

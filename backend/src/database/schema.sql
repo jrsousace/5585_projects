@@ -8,7 +8,13 @@ CREATE TABLE IF NOT EXISTS Usuarios (
     email VARCHAR(255) UNIQUE NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
     assinatura_plano VARCHAR(50) DEFAULT 'basic',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status_conta VARCHAR(50) DEFAULT 'ativo',
+    deleted_at TIMESTAMP,
+    -- Mantido apenas o padrão de auditoria
+    timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_criacao UUID REFERENCES Usuarios(id_usuario),
+    timestamp_atualizacao TIMESTAMP,
+    usuario_atualizacao UUID REFERENCES Usuarios(id_usuario)
 );
 
 -- Módulo Orçamento Doméstico
@@ -76,34 +82,68 @@ CREATE TABLE IF NOT EXISTS Descricao (
 
 CREATE TABLE IF NOT EXISTS Transacoes (
     id_transacao UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    timestamp_insercao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_insercao UUID REFERENCES Usuarios(id_usuario),
-    data_evento DATE NOT NULL,
+    timestamp_insercao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Controle de Datas
+    data_vencimento DATE NOT NULL,
+    data_pagamento DATE, -- Pode ser NULL se o status for 'pendente'
     competencia VARCHAR(7), -- Formato 'MM-YYYY'
+    
     id_descricao UUID REFERENCES Descricao(id_descricao),
     valor_total DECIMAL(15, 2) NOT NULL,
     tipo VARCHAR(50) NOT NULL, -- 'receita' ou 'despesa'
-    saldo DECIMAL(15, 2),
-    status VARCHAR(50),
+    
+    -- Controle de Parcelas e Metadados
+    parcela_atual INT DEFAULT 1,
+    total_parcelas INT DEFAULT 1,
+    observacao TEXT,
+    
+    transacao_status VARCHAR(50), -- 'pago', 'pendente', 'atrasado'
     id_forma_pg UUID REFERENCES Forma_Pagamento(id_forma_pg),
-    timestamp_atualizacao TIMESTAMP,
+    id_conta UUID REFERENCES Conta(id_conta),
+    
     usuario_atualizacao UUID REFERENCES Usuarios(id_usuario),
-    id_conta UUID REFERENCES Conta(id_conta)
+    timestamp_atualizacao TIMESTAMP
 );
 
 -- Módulo Investimentos
 CREATE TABLE IF NOT EXISTS Tipo_Investimento (
     id_tipo_investimento UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    tipo VARCHAR(100) NOT NULL
+    tipo VARCHAR(100) NOT NULL,
+    usuario_criacao UUID REFERENCES Usuarios(id_usuario),
+    timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_atualizacao UUID REFERENCES Usuarios(id_usuario),
+    timestamp_atualizacao TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS Investimentos (
     id_investimento UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    ativo VARCHAR(100) NOT NULL,
+    id_conta UUID REFERENCES Conta(id_conta), -- Conta onde o investimento foi realizado
+    ativo VARCHAR(100) NOT NULL, 
     data_aplicacao DATE NOT NULL,
-    valor_investido DECIMAL(15, 2) NOT NULL,
-    rentabilidade_esperada DECIMAL(8, 4),
+    quantidade DECIMAL(15, 8) NOT NULL, 
+    preco_unitario DECIMAL(15, 4) NOT NULL, 
+    valor_investido DECIMAL(15, 2) NOT NULL, 
+    indexador VARCHAR(50), 
+    taxa_contratada DECIMAL(8, 4), 
     vencimento DATE,
+    cotacao_atual DECIMAL(15, 4), 
+    data_ultima_cotacao TIMESTAMP,
     id_tipo_investimento UUID REFERENCES Tipo_Investimento(id_tipo_investimento),
-    usuario_insercao UUID REFERENCES Usuarios(id_usuario)
+    usuario_insercao UUID REFERENCES Usuarios(id_usuario),
+    timestamp_insercao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_atualizacao UUID REFERENCES Usuarios(id_usuario),
+    timestamp_atualizacao TIMESTAMP
 );
+
+-- Índices para isolamento de dados (Multi-tenant)
+CREATE INDEX idx_transacoes_usuario ON Transacoes(usuario_insercao);
+CREATE INDEX idx_investimentos_usuario ON Investimentos(usuario_insercao);
+CREATE INDEX idx_categorias_usuario ON Categoria(usuario_criacao);
+CREATE INDEX idx_contas_usuario ON Conta(usuario_criacao);
+
+-- Índices para Dashboards (Buscas por data e competência são constantes)
+CREATE INDEX idx_transacoes_data ON Transacoes(data_evento);
+CREATE INDEX idx_transacoes_competencia ON Transacoes(competencia);
+CREATE INDEX idx_investimentos_data ON Investimentos(data_aplicacao);

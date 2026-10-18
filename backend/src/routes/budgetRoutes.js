@@ -1,17 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const budgetController = require('../controllers/budgetController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-// Simulação simples de Middleware para checar Token (a ser expandido)
-const authMiddleware = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) return res.status(401).json({ message: 'Token não fornecido' });
-  // Aqui validaríamos o JWT com jsonwebtoken
-  next();
-};
-
+// Todas as rotas de orçamento passarão pelo middleware de proteção
 router.use(authMiddleware);
 
 router.get('/transactions', budgetController.getTransactions);
+router.post('/transactions', budgetController.createTransaction);
 
 module.exports = router;
