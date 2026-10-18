@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Financeiro - Dashboard</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>FinanceApp</h2>
+      </div>
+      <nav class="sidebar-nav" id="main-nav">
+        <!-- Navegação injetada dinamicamente pelo JS (Fase 3) -->
+      </nav>
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="btn btn-outline" style="width: 100%;">Sair</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <button id="btn-menu-toggle" class="menu-toggle">☰</button>
+        <div class="user-info">
+          <span id="user-name">Carregando...</span>
+        </div>
+      </header>
+
+      <!-- Container raiz onde os templates serão renderizados (Fase 2) -->
+      <div id="app" class="content-area"></div>
+    </main>
+  </div>
+
+  <!-- Fase 4 e Fase 3: Templates HTML escondidos -->
+  
+  <!-- Template: Dashboard (Home) -->
+  <template id="tpl-dashboard">
+    <div class="view-header">
+      <h1>Dashboard</h1>
+      <p>Bem-vindo ao seu painel financeiro.</p>
+    </div>
+    <div class="dashboard-cards">
+      <div class="card">
+        <h3>Saldo Atual</h3>
+        <p class="h2">R$ <span id="dash-saldo">0,00</span></p>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Orçamento Doméstico -->
+  <template id="tpl-orcamento">
+    <div class="view-header">
+      <h1>Orçamento Doméstico</h1>
+      <button class="btn" data-action="nova-transacao">Nova Transação</button>
+    </div>
+    
+    <div class="card mt-4">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Valor</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-transacoes">
+            <!-- Renderizado via JS DocumentFragment -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Upsell (Sem permissão) -->
+  <template id="tpl-upsell">
+    <div class="upsell-container text-center">
+      <h2>Módulo Premium</h2>
+      <p>Este módulo requer uma assinatura ativa. Faça o upgrade do seu plano para liberar acesso ao controle avançado de Orçamento Doméstico.</p>
+      <button class="btn mt-4">Fazer Upgrade Agora</button>
+    </div>
+  </template>
+
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/modules/budget.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
