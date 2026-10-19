@@ -20,9 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. Delegação de Eventos Central (Fase 2)
   setupEventDelegation();
   
-  // 6. Mobile Menu Toggle
-  document.getElementById('btn-menu-toggle').addEventListener('click', () => {
-    document.querySelector('.sidebar').classList.toggle('open');
+  // 6. Mobile Menu Toggle e Fechamento
+  const sidebar = document.querySelector('.sidebar');
+  document.getElementById('btn-menu-toggle').addEventListener('click', (e) => {
+    e.stopPropagation(); // Evita que o clique se propague e feche imediatamente
+    sidebar.classList.toggle('open');
+  });
+
+  // Fechar ao clicar fora (focar no conteúdo principal)
+  document.querySelector('.main-content').addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+    }
+  });
+
+  // Fechar ao clicar no cabeçalho "FinanceApp"
+  document.getElementById('btn-logo-home').addEventListener('click', () => {
+    // Redireciona para o Dashboard ao clicar no logo
+    window.location.hash = '#/';
+    
+    if (sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+    }
+  });
+
+  // Fechar a sidebar automaticamente sempre que trocar de rota/tela
+  document.addEventListener('routeChanged', () => {
+    if (sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+    }
   });
 
   // 7. Logout
@@ -137,18 +163,33 @@ function setupEventDelegation() {
   const appContainer = document.getElementById('app');
   
   appContainer.addEventListener('click', (e) => {
-    // Exemplo: Botão Nova Transação
+    // Exemplo: Botão Nova Transação e Editar
     if (e.target.matches('[data-action="nova-transacao"]')) {
       abrirModalNovaTransacao();
     }
-    // Botão Importar Fatura (OCR) e Open Finance
-    if (e.target.matches('[data-action="importar-fatura"]')) {
+    if (e.target.matches('[data-action="edit-transacao"]')) {
+      abrirModalNovaTransacao(e.target.getAttribute('data-id'));
+    }
+    
+    // Botão Tornar Pago (Transações)
+    if (e.target.matches('[data-action="pagar-transacao"]')) {
+      abrirModalPagarTransacao(e.target.getAttribute('data-id'), e.target.getAttribute('data-valor'));
+    }
+
+    // Botões de Fatura e Extrato
+    if (e.target.closest('[data-action="importar-fatura"]')) {
       abrirModalImportarFatura();
     }
-    if (e.target.matches('[data-action="conectar-open-finance"]')) {
+    if (e.target.closest('[data-action="conectar-open-finance"]')) {
       abrirModalOpenFinance();
     }
     
+    // Botão Ver Itens da Fatura (Lista)
+    if (e.target.closest('[data-action="ver-itens-fatura"]')) {
+      const btn = e.target.closest('[data-action="ver-itens-fatura"]');
+      abrirDetalhesFatura(btn.getAttribute('data-id'));
+    }
+
     // Botão Nova Assinatura
     if (e.target.matches('[data-action="nova-assinatura"]')) {
       abrirModalAssinatura();
@@ -197,13 +238,30 @@ function setupEventDelegation() {
   });
 }
 
-function abrirModalNovaTransacao() {
+function abrirModalNovaTransacao(id = null) {
   const modalBackdrop = document.getElementById('modal-backdrop');
   const modalBody = document.getElementById('modal-body-content');
   const tplForm = document.getElementById('tpl-form-transacao');
   
+  document.getElementById('modal-title').textContent = id ? 'Editar Transação' : 'Nova Transação';
   modalBody.innerHTML = '';
   modalBody.appendChild(tplForm.content.cloneNode(true));
+
+  if (id && appState.budget.transactions) {
+    const t = appState.budget.transactions.find(x => x.id_transacao === id);
+    if (t) {
+      document.getElementById('t-tipo').value = t.tipo;
+      document.getElementById('t-status').value = t.transacao_status || 'pago';
+      document.getElementById('t-descricao').value = t.descricao;
+      document.getElementById('t-valor').value = parseFloat(t.valor_total).toFixed(2);
+      
+      const dataVenc = t.data_vencimento || t.data_evento;
+      if (dataVenc) document.getElementById('t-data-venc').value = dataVenc.substring(0, 10);
+      
+      if (t.data_pagamento) document.getElementById('t-data-pag').value = t.data_pagamento.substring(0, 10);
+      if (t.observacao) document.getElementById('t-obs').value = t.observacao;
+    }
+  }
   
   // Atrela o submit ao formulário recém injetado
   const form = document.getElementById('form-transacao');
@@ -314,6 +372,16 @@ async function abrirModalImportarFatura() {
           { data: '15/11', descricao: 'Papel Higiênico (Pct 12)', valor: 18.90 }
         ];
         tituloRevisao = 'Nota de Supermercado Processada';
+      } else if (tipoDoc === 'contracheque') {
+        // Receitas entram positivas, descontos podem entrar negativos (IRRF, INSS)
+        // No contexto do painel de revisão as receitas são positivas, no BD as regras lidam com tipo 'receita' ou 'despesa'
+        mockLLMResponse = [
+          { data: '05/11', descricao: 'Salário Base', valor: 5500.00 },
+          { data: '05/11', descricao: 'INSS', valor: -608.44 },
+          { data: '05/11', descricao: 'IRRF', valor: -450.20 },
+          { data: '05/11', descricao: 'Vale Refeição', valor: 850.00 }
+        ];
+        tituloRevisao = 'Leitura do Contracheque (Holerite)';
       }
 
       abrirTelaRevisao(mockLLMResponse, tituloRevisao);

@@ -22,6 +22,7 @@ body {
 .sidebar-header {
   padding: var(--spacing-lg);
   border-bottom: none;
+  cursor: pointer;
 }
 
 .sidebar-nav {
@@ -254,6 +255,8 @@ body {
   background: var(--surface-color);
   width: 90%;
   max-width: 500px;
+  max-height: 90vh; /* Limita a altura do modal */
+  overflow-y: auto; /* Habilita o scroll interno */
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   padding: var(--spacing-lg);
@@ -264,12 +267,19 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-md);
+  position: sticky;
+  top: 0;
+  background: var(--surface-color);
+  padding-bottom: 0.5rem;
+  z-index: 10;
 }
 
 .btn-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 2rem; /* Mais fácil de clicar no mobile */
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
   color: var(--text-muted);
 }

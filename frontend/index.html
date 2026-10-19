@@ -17,7 +17,7 @@
   <div class="app-layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="sidebar-header">
+      <div class="sidebar-header" id="btn-logo-home" title="Voltar ao Dashboard">
         <h2>FinanceApp</h2>
       </div>
       <nav class="sidebar-nav" id="main-nav">
@@ -183,11 +183,11 @@
         <h1>Faturas e Extratos</h1>
         <p class="text-muted">Gestão automatizada e revisão de faturas de cartões.</p>
       </div>
-      <div style="display: flex; gap: 0.5rem;">
-        <button class="btn btn-outline" data-action="conectar-open-finance" style="display: flex; align-items: center; gap: 0.5rem;">
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+        <button class="btn btn-outline" data-action="conectar-open-finance" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 160px;">
           <span>🔗</span> Open Finance
         </button>
-        <button class="btn" data-action="importar-fatura" style="display: flex; align-items: center; gap: 0.5rem;">
+        <button class="btn" data-action="importar-fatura" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 160px;">
           <span>📄</span> Leitura OCR (IA)
         </button>
       </div>
@@ -673,6 +673,23 @@
     </form>
   </template>
 
+  <!-- Formulário de Confirmar Pagamento -->
+  <template id="tpl-form-pagar-transacao">
+    <form id="form-pagar">
+      <p class="text-muted mb-4">Confirme os dados para dar baixa nesta transação.</p>
+      <div class="form-group">
+        <label class="form-label">Valor Efetivamente Pago (R$)</label>
+        <input type="number" id="p-valor" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data do Pagamento</label>
+        <input type="date" id="p-data" required>
+      </div>
+      <input type="hidden" id="p-id">
+      <button type="submit" class="btn mt-4">Confirmar Pagamento</button>
+    </form>
+  </template>
+
   <!-- Formulário de Categoria (Escondido) -->
   <template id="tpl-form-categoria">
     <form id="form-categoria">
@@ -771,6 +788,7 @@
           <option value="consumo">Conta de Consumo (Água, Luz, Internet)</option>
           <option value="nota_fiscal">Nota Fiscal (Supermercado, Lojas)</option>
           <option value="extrato">Extrato Bancário (PDF/OFX)</option>
+          <option value="contracheque">Contracheque / Holerite (Salário)</option>
         </select>
       </div>
 
@@ -999,172 +1017,10 @@
         <div class="card" style="border-top: 4px solid var(--error-color);">
           <h3>⚡ Day Trade / Swing Trade</h3>
           <p class="text-muted text-meta mt-2">Foco em fluxo de tela, derivativos e análise técnica.</p>
-          <ul style="margin-top:1rem; padding-left:1.5rem; font-size:var(--text-body); color: var(--text-muted);">
-            <li style="margin-bottom:0.5rem">Alta Liquidez Diária (Volume &gt; R$ 10M).</li>
-            <li style="margin-bottom:0.5rem"><strong>Rompimento de Médias:</strong> (MM9, MM20, MM200).</li>
-            <li style="margin-bottom:0.5rem"><strong>IFR</strong> (Índice de Força Relativa) Sobrevendido/Comprado.</li>
-            <li style="margin-bottom:0.5rem">Topos e Fundos Ascendentes.</li>
-            <li style="margin-bottom:0.5rem">Uso rigoroso de <strong>Stop Loss</strong> e <strong>Stop Gain</strong>.</li>
           </ul>
         </div>
       </div>
     </div>
-  </template>
-      <button class="tab-btn" onclick="switchTabInv('graficos')">Análise Gráfica</button>
-      <button class="tab-btn" onclick="switchTabInv('matriz')">Matriz de Risco</button>
-    </div>
-
-    <!-- Aba 1: Tabela de Carteira -->
-    <div id="tab-inv-carteira" class="tab-content active">
-        <div class="card">
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Ativo</th>
-                  <th>Tipo / Perfil</th>
-                  <th>Data Aplicação</th>
-                  <th>Vencimento</th>
-                  <th>Investido</th>
-                  <th>Valor Presente (Estimado)</th>
-                  <th style="width: 80px; text-align: center;">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="lista-investimentos">
-                <!-- Renderizado via JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-    </div>
-
-    <!-- Aba 2: Gráficos de Distribuição -->
-    <div id="tab-inv-graficos" class="tab-content" style="display: none;">
-        <div class="dashboard-cards">
-            <div class="card">
-                <h3 class="text-muted">Distribuição (Por Tipo)</h3>
-                <div style="position: relative; height:250px; width:100%; margin-top: var(--spacing-sm);">
-                  <canvas id="investmentsChart"></canvas>
-                </div>
-            </div>
-            <div class="card">
-                <h3 class="text-muted">Alocação por Perfil de Risco</h3>
-                 <div style="position: relative; height:250px; width:100%; margin-top: var(--spacing-sm);">
-                  <canvas id="riskChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Aba 3: Matriz de Risco e Análise -->
-    <div id="tab-inv-matriz" class="tab-content" style="display: none;">
-        <div class="card" style="margin-bottom: var(--spacing-lg);">
-            <h3>Matriz de Análise de Ações e Estratégias</h3>
-            <p class="text-muted text-meta">Diagnóstico da sua carteira baseado nos critérios de volatilidade e liquidez.</p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                <div style="border-left: 4px solid var(--info-color); padding: 1rem; background: rgba(37, 99, 235, 0.05);">
-                    <h4 style="margin-top: 0; color: var(--info-color);">Conservadora</h4>
-                    <ul class="text-meta" id="lista-matriz-conservadora" style="padding-left: 1rem;">
-                        <!-- Injetado: Tesouro Direto, CDBs -->
-                    </ul>
-                </div>
-                <div style="border-left: 4px solid var(--warning-color); padding: 1rem; background: rgba(245, 158, 11, 0.05);">
-                    <h4 style="margin-top: 0; color: var(--warning-color);">Arrojada (Buy & Hold)</h4>
-                    <ul class="text-meta" id="lista-matriz-arrojada" style="padding-left: 1rem;">
-                        <!-- Injetado: Ações, FIIs de Risco -->
-                    </ul>
-                </div>
-                <div style="border-left: 4px solid var(--error-color); padding: 1rem; background: rgba(220, 38, 38, 0.05);">
-                    <h4 style="margin-top: 0; color: var(--error-color);">Especulação (Day Trade)</h4>
-                    <p class="text-meta text-muted">Métricas de volatilidade diária acima de 2.5%.</p>
-                     <ul class="text-meta" id="lista-matriz-trade" style="padding-left: 1rem;">
-                        <!-- Injetado: Minidólar, Opções, Cripto de alta volatilidade -->
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-  </template>
-
-  <!-- Template: Orçamentos e Metas -->
-  <template id="tpl-metas">
-    <div class="view-header">
-      <div>
-        <h1>Orçamentos e Metas</h1>
-        <p class="text-muted">Planeje seus gastos e alcance seus sonhos financeiros.</p>
-      </div>
-      <div style="display: flex; gap: 0.5rem;">
-        <button class="btn btn-outline" data-action="novo-orcamento">Definir Orçamento</button>
-        <button class="btn" data-action="nova-meta">+ Nova Meta</button>
-      </div>
-    </div>
-
-    <!-- Seção 1: Orçamentos (Teto de Gastos do Mês Atual) -->
-    <div class="card mt-4">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
-        <h3>Orçamento Mensal (Mês Atual)</h3>
-        <span class="text-muted text-meta">Atualizado em tempo real</span>
-      </div>
-      
-      <div id="lista-orcamentos" style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <!-- Injetado via JS -->
-      </div>
-    </div>
-
-    <!-- Seção 2: Metas (Objetivos de Longo Prazo) -->
-    <div class="card mt-4" style="margin-bottom: var(--spacing-lg);">
-      <h3>Metas Financeiras (Cofrinhos)</h3>
-      
-      <div class="dashboard-cards" id="lista-metas-cards" style="margin-top: var(--spacing-md);">
-        <!-- Injetado via JS -->
-      </div>
-    </div>
-  </template>
-
-  <!-- Formulário de Novo Orçamento -->
-  <template id="tpl-form-orcamento">
-    <form id="form-orcamento">
-      <div class="form-group text-center mb-4">
-        <p class="text-muted">Defina um limite de gastos para receber alertas antes de estourar o orçamento.</p>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Categoria a ser monitorada</label>
-        <select id="orc-categoria" required>
-          <!-- Categorias do usuário -->
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Limite Mensal (R$)</label>
-        <input type="number" id="orc-limite" step="0.01" required placeholder="Ex: 800.00">
-      </div>
-      <button type="submit" class="btn">Salvar Orçamento</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Nova Meta -->
-  <template id="tpl-form-meta">
-    <form id="form-meta">
-      <div class="form-group">
-        <label class="form-label">Nome da Meta</label>
-        <input type="text" id="meta-nome" required placeholder="Ex: Trocar de Carro">
-      </div>
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Valor Alvo (R$)</label>
-          <input type="number" id="meta-alvo" step="0.01" required placeholder="50000.00">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Data Limite (Alvo)</label>
-          <input type="month" id="meta-data" required>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label text-muted">Saldo Inicial (Já guardado)</label>
-        <input type="number" id="meta-saldo" step="0.01" value="0.00">
-      </div>
-      <button type="submit" class="btn">Criar Meta</button>
-    </form>
   </template>
 
   <!-- Formulário de Nova Assinatura -->

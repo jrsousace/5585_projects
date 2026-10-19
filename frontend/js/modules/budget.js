@@ -62,7 +62,10 @@ function renderTransactionsTable(transactions) {
       <td>${t.categoria || '-'}</td>
       <td>${formaPg}</td>
       <td style="color: ${valueColor}">${value}</td>
-      <td>
+      <td style="white-space: nowrap;">
+        ${(t.transacao_status === 'pendente' || t.transacao_status === 'atrasado') 
+          ? `<button class="btn btn-outline" style="padding: 0.25rem 0.5rem; min-height: auto; color: var(--success-color); border-color: var(--success-color); margin-right: 0.25rem;" data-action="pagar-transacao" data-id="${t.id_transacao}" data-valor="${t.valor_total}" title="Tornar Pago">✔️ Pago</button>` 
+          : ''}
         <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; min-height: auto;" data-action="edit-transacao" data-id="${t.id_transacao}">✏️</button>
       </td>
     `;
