@@ -310,6 +310,13 @@ body {
   color: var(--text-color);
 }
 
+/* Utils Animados */
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(194, 65, 75, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(194, 65, 75, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(194, 65, 75, 0); }
+}
+
 /* Mobile First Adjustments */
 @media (max-width: 768px) {
   .sidebar {
@@ -326,4 +333,58 @@ body {
   .menu-toggle {
     display: block;
   }
+}
+
+/* =========================================
+   COMPONENTE: Abas (Tabs) 
+   ========================================= */
+.tabs-container {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none; /* Esconde scrollbar no Firefox */
+}
+.tabs-container::-webkit-scrollbar {
+  display: none; /* Esconde scrollbar no Chrome/Safari */
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: var(--spacing-sm) 0;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--primary-color);
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+/* =========================================
+   CUSTOM SCROLLBAR (Para um look Premium)
+   ========================================= */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color); 
+  border-radius: var(--radius-md);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted); 
 }

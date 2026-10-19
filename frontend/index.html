@@ -114,6 +114,68 @@
     </div>
   </template>
 
+  <!-- Template: Orçamentos / Metas -->
+  <template id="tpl-metas">
+    <div class="view-header">
+      <div>
+        <h1>Orçamentos e Metas</h1>
+        <p class="text-muted">Planeje seus limites mensais e acompanhe seus grandes objetivos.</p>
+      </div>
+    </div>
+    
+    <div class="tabs-container" style="border-bottom: 1px solid var(--border-color); margin-bottom: var(--spacing-lg); display: flex; gap: 1rem; overflow-x: auto;">
+      <button class="btn-tab active" data-target="tab-orc-mensal" style="background: none; border: none; border-bottom: 2px solid var(--primary-color); padding: 0.5rem 1rem; color: var(--text-color); font-weight: 600; cursor: pointer; white-space: nowrap;">Orçamento Mensal</button>
+      <button class="btn-tab" data-target="tab-metas-longo" style="background: none; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 1rem; color: var(--text-muted); font-weight: 500; cursor: pointer; white-space: nowrap;">Metas de Longo Prazo</button>
+    </div>
+
+    <!-- TAB: Orçamento Mensal -->
+    <div id="tab-orc-mensal" class="tab-pane">
+      <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
+        <div class="card card-featured">
+          <h3>Planejado vs Realizado</h3>
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: var(--spacing-sm);">
+            <div>
+              <p class="text-muted text-meta" style="color: rgba(255,255,255,0.7) !important;">Gasto Atual</p>
+              <p class="h2">R$ <span id="orc-gasto">0,00</span></p>
+            </div>
+            <div style="text-align: right;">
+              <p class="text-muted text-meta" style="color: rgba(255,255,255,0.7) !important;">Teto Mensal</p>
+              <p class="h3" style="color: white; font-weight: normal;">R$ <span id="orc-teto">0,00</span></p>
+            </div>
+          </div>
+          <div style="width: 100%; background-color: rgba(255,255,255,0.2); height: 8px; border-radius: 4px; margin-top: 1rem; overflow: hidden;">
+            <div id="orc-progress-bar" style="width: 0%; height: 100%; background-color: var(--success-color); transition: width 0.5s ease, background-color 0.5s;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>Acompanhamento Diário (Fluxo de Caixa)</h3>
+          <select class="form-group" style="width: auto; margin: 0; padding: 0.25rem;" id="orc-mes-selector">
+            <!-- Popula com os meses -->
+          </select>
+        </div>
+        <p class="text-muted text-meta mb-4">Clique nos dias para expandir e ver o detalhamento do caixa.</p>
+        
+        <div id="orc-calendario-accordion">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Metas de Longo Prazo -->
+    <div id="tab-metas-longo" class="tab-pane" style="display: none;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+        <button class="btn btn-outline" data-action="nova-meta">+ Nova Meta</button>
+      </div>
+      
+      <div id="lista-metas-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+        <!-- Renderizado via JS -->
+      </div>
+    </div>
+  </template>
+
   <!-- Template: Faturas (Cartões e Diversas) -->
   <template id="tpl-faturas">
     <div class="view-header">
@@ -145,6 +207,311 @@
           </thead>
           <tbody id="lista-faturas">
             <!-- Renderizado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Relatórios (Estrutura Genérica que atende as 4 visões) -->
+  <template id="tpl-relatorios">
+    <div class="view-header">
+      <div>
+        <h1 id="rel-title">Relatório</h1>
+        <p class="text-muted" id="rel-desc">Análise detalhada do período.</p>
+      </div>
+      <button class="btn btn-outline" style="display: flex; gap: 0.5rem; align-items: center;">
+        <span>📥</span> Exportar PDF/CSV
+      </button>
+    </div>
+
+    <!-- Barra de Filtros -->
+    <div class="card mb-4" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--surface-color);">
+      <span class="text-muted" style="font-weight: 500;">Período:</span>
+      <select id="rel-filtro-periodo" class="form-group" style="margin: 0; width: auto; padding: 0.25rem 0.5rem; min-height: auto;">
+        <option value="30">Últimos 30 dias</option>
+        <option value="ytd">Neste Ano (YTD)</option>
+        <option value="12m" selected>Últimos 12 meses</option>
+        <option value="all">Todo o Histórico</option>
+      </select>
+      <button class="btn btn-outline" style="padding: 0.25rem 1rem; min-height: auto;" onclick="initRelatorioView(window.location.hash.replace('#', ''))">Atualizar</button>
+    </div>
+
+    <!-- Área Gráfica -->
+    <div class="card mb-4">
+      <div style="position: relative; height: 350px; width: 100%;">
+        <canvas id="relatorioChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Área Tabular -->
+    <div class="card">
+      <h3 class="mb-4">Detalhamento Numérico</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead id="rel-table-head">
+            <!-- Injetado via JS -->
+          </thead>
+          <tbody id="rel-table-body">
+            <!-- Injetado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Ferramentas -> Juros Compostos -->
+  <template id="tpl-tools-juros">
+    <div class="view-header">
+      <div>
+        <h1>Simulador de Juros Compostos</h1>
+        <p class="text-muted">Projete o crescimento do seu dinheiro ao longo do tempo.</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+      <div class="card" style="flex: 1; min-width: 300px;">
+        <form id="form-juros">
+          <div class="form-group">
+            <label class="form-label">Valor Inicial (R$)</label>
+            <input type="number" id="j-inicial" value="1000" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Aporte Mensal (R$)</label>
+            <input type="number" id="j-mensal" value="500" step="0.01" required>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Taxa Anual (%)</label>
+              <input type="number" id="j-taxa" value="10" step="0.01" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">Período (Anos)</label>
+              <input type="number" id="j-anos" value="10" required>
+            </div>
+          </div>
+          <button type="submit" class="btn mt-2">Calcular</button>
+        </form>
+      </div>
+      <div class="card" style="flex: 2; min-width: 300px;">
+        <h3 class="mb-4">Resultado Total: <span id="j-resultado-total" style="color: var(--success-color);">R$ 0,00</span></h3>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+          <div style="flex: 1;"><p class="text-muted text-meta">Total Investido</p><p id="j-resultado-investido">R$ 0,00</p></div>
+          <div style="flex: 1;"><p class="text-muted text-meta">Total em Juros</p><p id="j-resultado-juros" style="color: var(--success-color);">R$ 0,00</p></div>
+        </div>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="jurosChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Ferramentas -> Independência Financeira -->
+  <template id="tpl-tools-independencia">
+    <div class="view-header">
+      <div>
+        <h1>Independência Financeira (FIRE)</h1>
+        <p class="text-muted">Descubra quando você poderá viver de renda (Regra dos 4%).</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+      <div class="card" style="flex: 1; min-width: 300px;">
+        <form id="form-fire">
+          <div class="form-group">
+            <label class="form-label">Custo de Vida Mensal Desejado (R$)</label>
+            <input type="number" id="f-custo" value="5000" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Patrimônio Atual Investido (R$)</label>
+            <input type="number" id="f-atual" value="50000" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Aporte Mensal (R$)</label>
+            <input type="number" id="f-aporte" value="1500" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rentabilidade Real Anual (% acima da inflação)</label>
+            <input type="number" id="f-rent" value="6" step="0.01" required>
+          </div>
+          <button type="submit" class="btn mt-2">Calcular Rota</button>
+        </form>
+      </div>
+      <div class="card" style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+        <h3 class="text-muted mb-4">Você alcançará a Independência em:</h3>
+        <p class="h2" style="font-size: 4rem; color: var(--primary-color);" id="f-anos-resultado">-- anos</p>
+        <p class="h3 mt-4 text-muted">Patrimônio Alvo Necessário</p>
+        <p class="h2" style="color: var(--success-color);" id="f-alvo-resultado">R$ 0,00</p>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Ferramentas -> Amortização -->
+  <template id="tpl-tools-amortizacao">
+    <div class="view-header">
+      <div>
+        <h1>Calculadora de Amortização</h1>
+        <p class="text-muted">Simule financiamentos e veja o impacto financeiro.</p>
+      </div>
+    </div>
+    <div class="card mb-4">
+      <form id="form-amort" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; min-width: 150px; margin: 0;">
+          <label class="form-label">Valor Financiado</label>
+          <input type="number" id="am-valor" value="300000" step="0.01" required>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
+          <label class="form-label">Taxa Anual (%)</label>
+          <input type="number" id="am-taxa" value="9.5" step="0.01" required>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
+          <label class="form-label">Meses</label>
+          <input type="number" id="am-meses" value="360" required>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
+          <label class="form-label">Sistema</label>
+          <select id="am-sistema">
+            <option value="SAC">SAC</option>
+            <option value="PRICE">PRICE</option>
+          </select>
+        </div>
+        <button type="submit" class="btn" style="flex: 1; min-width: 150px;">Simular</button>
+      </form>
+    </div>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap;">
+        <h3 class="text-muted">Total Pago: <span id="am-total" style="color: var(--text-color);">R$ 0,00</span></h3>
+        <h3 class="text-muted">Total Juros: <span id="am-juros" style="color: var(--error-color);">R$ 0,00</span></h3>
+      </div>
+      <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="data-table">
+          <thead>
+            <tr><th>Mês</th><th>Parcela</th><th>Amortização</th><th>Juros</th><th>Saldo Devedor</th></tr>
+          </thead>
+          <tbody id="lista-amort"></tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: IRPF -> Resumo Anual -->
+  <template id="tpl-irpf-resumo">
+    <div class="view-header">
+      <div>
+        <h1>Resumo Anual para Declaração (IRPF)</h1>
+        <p class="text-muted">Valores consolidados por ano-calendário prontos para o Carnê-Leão e IRPF anual.</p>
+      </div>
+      <select id="irpf-ano" class="form-group" style="width: 120px; margin: 0; padding: 0.25rem 0.5rem;">
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+      </select>
+    </div>
+
+    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
+      <div class="card" style="border-left: 4px solid var(--success-color);">
+        <h3>Rendimentos Tributáveis</h3>
+        <p class="h2">R$ 145.500,00</p>
+        <p class="text-muted text-meta mt-2">Salários, Pró-Labore, Aluguéis recebidos</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--info-color);">
+        <h3>Rendimentos Isentos</h3>
+        <p class="h2">R$ 22.340,00</p>
+        <p class="text-muted text-meta mt-2">Dividendos, Vendas de Ações &lt; 20k, LCI/LCA</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="mb-4">Despesas Dedutíveis (Pagamentos Efetuados)</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead><tr><th>Código/Grupo</th><th>Descrição / Beneficiário</th><th>Valor Total Declarado</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>26 - Plano de Saúde</strong></td>
+              <td>Amil Assistência Médica (CNPJ: 00.000.000/0001-00)</td>
+              <td style="color: var(--error-color);">R$ 14.200,00</td>
+            </tr>
+            <tr>
+              <td><strong>01 - Educação (Titular)</strong></td>
+              <td>Universidade X (CNPJ: 11.111.111/0001-11)</td>
+              <td style="color: var(--error-color);">R$ 8.500,00</td>
+            </tr>
+            <tr>
+              <td><strong>21 - Médicos, Dentistas</strong></td>
+              <td>Dr. João Silva (CPF: 123.456.789-00)</td>
+              <td style="color: var(--error-color);">R$ 1.200,00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: IRPF -> Apuração de Ações -->
+  <template id="tpl-irpf-apuracao">
+    <div class="view-header">
+      <div>
+        <h1>Apuração de Ações e FIIs (DARF)</h1>
+        <p class="text-muted">Apuração mensal de lucros e prejuízos com Renda Variável.</p>
+      </div>
+      <button class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;"><span>📄</span> Gerar DARF PDF</button>
+    </div>
+
+    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
+      <div class="card card-featured">
+        <h3>Imposto a Pagar (Mês Atual)</h3>
+        <p class="h2">R$ 152,40</p>
+      </div>
+      <div class="card">
+        <h3 class="text-muted">Prejuízo Acumulado (A Compensar)</h3>
+        <p class="h2" style="color: var(--error-color);">R$ 450,00</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th>Operação</th>
+              <th>Volume Vendas</th>
+              <th>Lucro/Prejuízo</th>
+              <th>Imposto Devido</th>
+              <th>Status DARF</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Out/2026</td>
+              <td>Mercado à Vista (Ações)</td>
+              <td>R$ 25.000,00</td>
+              <td style="color: var(--success-color);">+ R$ 1.500,00</td>
+              <td style="color: var(--error-color);">R$ 225,00</td>
+              <td><span style="color: var(--warning-color);">Pendente</span></td>
+            </tr>
+            <tr>
+              <td>Set/2026</td>
+              <td>Fundos Imobiliários</td>
+              <td>R$ 5.000,00</td>
+              <td style="color: var(--success-color);">+ R$ 762,00</td>
+              <td style="color: var(--error-color);">R$ 152,40</td>
+              <td><span style="color: var(--success-color);">Pago</span></td>
+            </tr>
+            <tr>
+              <td>Ago/2026</td>
+              <td>Mercado à Vista (Ações)</td>
+              <td>R$ 12.000,00</td>
+              <td style="color: var(--success-color);">+ R$ 3.000,00</td>
+              <td class="text-muted">Isento (&lt; 20k)</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Jul/2026</td>
+              <td>Day Trade (Mini Índice)</td>
+              <td>-</td>
+              <td style="color: var(--error-color);">- R$ 450,00</td>
+              <td class="text-muted">R$ 0,00</td>
+              <td>Prejuízo Registrado</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -519,39 +886,285 @@
       <button class="btn" data-action="novo-investimento">+ Novo Aporte</button>
     </div>
     
-    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
-      <div class="card card-featured">
-        <h3>Patrimônio Investido</h3>
-        <p class="h2">R$ <span id="inv-total">0,00</span></p>
+    <div class="tabs-container" style="border-bottom: 1px solid var(--border-color); margin-bottom: var(--spacing-lg); display: flex; gap: 1rem; overflow-x: auto;">
+      <button class="btn-tab active" data-target="tab-carteira" style="background: none; border: none; border-bottom: 2px solid var(--primary-color); padding: 0.5rem 1rem; color: var(--text-color); font-weight: 600; cursor: pointer; white-space: nowrap;">Minha Carteira</button>
+      <button class="btn-tab" data-target="tab-desempenho" style="background: none; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 1rem; color: var(--text-muted); font-weight: 500; cursor: pointer; white-space: nowrap;">Desempenho & Cotações</button>
+      <button class="btn-tab" data-target="tab-matriz" style="background: none; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 1rem; color: var(--text-muted); font-weight: 500; cursor: pointer; white-space: nowrap;">Matrizes de Análise</button>
+    </div>
+
+    <!-- TAB: Carteira -->
+    <div id="tab-carteira" class="tab-pane">
+      <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
+        <div class="card card-featured">
+          <h3>Patrimônio Investido</h3>
+          <p class="h2">R$ <span id="inv-total">0,00</span></p>
+        </div>
+        <div class="card">
+          <h3 class="text-muted">Distribuição (Por Tipo)</h3>
+          <div style="position: relative; height:120px; width:100%; margin-top: var(--spacing-sm);">
+            <canvas id="investmentsChart"></canvas>
+          </div>
+        </div>
       </div>
+
       <div class="card">
-        <h3 class="text-muted">Distribuição (Por Tipo)</h3>
-        <div style="position: relative; height:120px; width:100%; margin-top: var(--spacing-sm);">
-          <canvas id="investmentsChart"></canvas>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ativo</th>
+                <th>Tipo</th>
+                <th>Data Aplicação</th>
+                <th>Vencimento</th>
+                <th>Indexador / Taxa</th>
+                <th>Valor Investido</th>
+                <th style="width: 80px; text-align: center;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-investimentos">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Ativo</th>
-              <th>Tipo</th>
-              <th>Data Aplicação</th>
-              <th>Vencimento</th>
-              <th>Indexador / Taxa</th>
-              <th>Valor Investido</th>
-              <th style="width: 80px; text-align: center;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-investimentos">
-            <!-- Renderizado via JS -->
-          </tbody>
-        </table>
+    <!-- TAB: Desempenho e Cotações -->
+    <div id="tab-desempenho" class="tab-pane" style="display: none;">
+      <div class="card mb-4">
+        <h3>Filtros de Análise</h3>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+          <select id="filtro-tipo" class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+            <option value="todos">Todos os Tipos</option>
+            <option value="Renda Fixa">Renda Fixa</option>
+            <option value="Renda Variável">Renda Variável</option>
+            <option value="FIIs">Fundos Imobiliários</option>
+          </select>
+          <select id="filtro-corretora" class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+            <option value="todas">Todas as Corretoras</option>
+            <option value="nu">Nubank</option>
+            <option value="inter">Banco Inter</option>
+            <option value="xp">XP Investimentos</option>
+          </select>
+          <button class="btn btn-outline" id="btn-aplicar-filtros" style="flex: 1; min-width: 150px; padding: 0.75rem;">Aplicar Filtros</button>
+        </div>
+      </div>
+
+      <div class="dashboard-cards mb-4">
+        <div class="card">
+          <h3>Evolução do Rendimento</h3>
+          <div style="position: relative; height:250px; width:100%; margin-top: var(--spacing-sm);">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Cotações em Tempo Real (Média do Dia) <span style="display:inline-block; width:10px; height:10px; background:var(--error-color); border-radius:50%; animation: pulse 2s infinite; margin-left: 0.5rem;" title="AO VIVO"></span></h3>
+          <p class="text-muted text-meta">Pregão B3 (Simulado)</p>
+          <div class="table-responsive mt-4">
+            <table class="data-table">
+              <thead><tr><th>Ativo</th><th>Preço Médio</th><th>Variação</th></tr></thead>
+              <tbody id="lista-cotacoes"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- TAB: Matriz de Análise -->
+    <div id="tab-matriz" class="tab-pane" style="display: none;">
+      <p class="mb-4 text-muted">Orientações de mercado para auxiliar na escolha dos seus ativos baseados no seu perfil de investidor.</p>
+      <div class="dashboard-cards">
+        <div class="card" style="border-top: 4px solid var(--success-color);">
+          <h3>🛡️ Conservador (Buy & Hold)</h3>
+          <p class="text-muted text-meta mt-2">Foco em empresas sólidas e proventos (Dividendos).</p>
+          <ul style="margin-top:1rem; padding-left:1.5rem; font-size:var(--text-body); color: var(--text-muted);">
+            <li style="margin-bottom:0.5rem"><strong>P/L Histórico &lt; 15</strong> (Preço/Lucro atrativo)</li>
+            <li style="margin-bottom:0.5rem"><strong>Dividend Yield &gt; 6% a.a.</strong></li>
+            <li style="margin-bottom:0.5rem"><strong>Dívida Líquida / EBITDA &lt; 2.0x</strong></li>
+            <li style="margin-bottom:0.5rem"><strong>ROE</strong> (Retorno sobre Patrimônio) &gt; 10%</li>
+            <li style="margin-bottom:0.5rem">Setores perenes: Bancos, Seguros, Energia.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--info-color);">
+          <h3>🚀 Arrojado (Growth)</h3>
+          <p class="text-muted text-meta mt-2">Foco em valorização de capital e teses de crescimento.</p>
+          <ul style="margin-top:1rem; padding-left:1.5rem; font-size:var(--text-body); color: var(--text-muted);">
+            <li style="margin-bottom:0.5rem"><strong>Crescimento Receita YoY &gt; 20%</strong></li>
+            <li style="margin-bottom:0.5rem"><strong>CAGR de Lucros Altos</strong></li>
+            <li style="margin-bottom:0.5rem">Setores: Tecnologia, Varejo Online, Saúde.</li>
+            <li style="margin-bottom:0.5rem">Múltiplos esticados (P/L &gt; 25 é aceitável se crescer rápido).</li>
+            <li style="margin-bottom:0.5rem"><strong>Beta &gt; 1</strong> (Volatilidade Maior).</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--error-color);">
+          <h3>⚡ Day Trade / Swing Trade</h3>
+          <p class="text-muted text-meta mt-2">Foco em fluxo de tela, derivativos e análise técnica.</p>
+          <ul style="margin-top:1rem; padding-left:1.5rem; font-size:var(--text-body); color: var(--text-muted);">
+            <li style="margin-bottom:0.5rem">Alta Liquidez Diária (Volume &gt; R$ 10M).</li>
+            <li style="margin-bottom:0.5rem"><strong>Rompimento de Médias:</strong> (MM9, MM20, MM200).</li>
+            <li style="margin-bottom:0.5rem"><strong>IFR</strong> (Índice de Força Relativa) Sobrevendido/Comprado.</li>
+            <li style="margin-bottom:0.5rem">Topos e Fundos Ascendentes.</li>
+            <li style="margin-bottom:0.5rem">Uso rigoroso de <strong>Stop Loss</strong> e <strong>Stop Gain</strong>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </template>
+      <button class="tab-btn" onclick="switchTabInv('graficos')">Análise Gráfica</button>
+      <button class="tab-btn" onclick="switchTabInv('matriz')">Matriz de Risco</button>
+    </div>
+
+    <!-- Aba 1: Tabela de Carteira -->
+    <div id="tab-inv-carteira" class="tab-content active">
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ativo</th>
+                  <th>Tipo / Perfil</th>
+                  <th>Data Aplicação</th>
+                  <th>Vencimento</th>
+                  <th>Investido</th>
+                  <th>Valor Presente (Estimado)</th>
+                  <th style="width: 80px; text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="lista-investimentos">
+                <!-- Renderizado via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+
+    <!-- Aba 2: Gráficos de Distribuição -->
+    <div id="tab-inv-graficos" class="tab-content" style="display: none;">
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3 class="text-muted">Distribuição (Por Tipo)</h3>
+                <div style="position: relative; height:250px; width:100%; margin-top: var(--spacing-sm);">
+                  <canvas id="investmentsChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="text-muted">Alocação por Perfil de Risco</h3>
+                 <div style="position: relative; height:250px; width:100%; margin-top: var(--spacing-sm);">
+                  <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba 3: Matriz de Risco e Análise -->
+    <div id="tab-inv-matriz" class="tab-content" style="display: none;">
+        <div class="card" style="margin-bottom: var(--spacing-lg);">
+            <h3>Matriz de Análise de Ações e Estratégias</h3>
+            <p class="text-muted text-meta">Diagnóstico da sua carteira baseado nos critérios de volatilidade e liquidez.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <div style="border-left: 4px solid var(--info-color); padding: 1rem; background: rgba(37, 99, 235, 0.05);">
+                    <h4 style="margin-top: 0; color: var(--info-color);">Conservadora</h4>
+                    <ul class="text-meta" id="lista-matriz-conservadora" style="padding-left: 1rem;">
+                        <!-- Injetado: Tesouro Direto, CDBs -->
+                    </ul>
+                </div>
+                <div style="border-left: 4px solid var(--warning-color); padding: 1rem; background: rgba(245, 158, 11, 0.05);">
+                    <h4 style="margin-top: 0; color: var(--warning-color);">Arrojada (Buy & Hold)</h4>
+                    <ul class="text-meta" id="lista-matriz-arrojada" style="padding-left: 1rem;">
+                        <!-- Injetado: Ações, FIIs de Risco -->
+                    </ul>
+                </div>
+                <div style="border-left: 4px solid var(--error-color); padding: 1rem; background: rgba(220, 38, 38, 0.05);">
+                    <h4 style="margin-top: 0; color: var(--error-color);">Especulação (Day Trade)</h4>
+                    <p class="text-meta text-muted">Métricas de volatilidade diária acima de 2.5%.</p>
+                     <ul class="text-meta" id="lista-matriz-trade" style="padding-left: 1rem;">
+                        <!-- Injetado: Minidólar, Opções, Cripto de alta volatilidade -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+  </template>
+
+  <!-- Template: Orçamentos e Metas -->
+  <template id="tpl-metas">
+    <div class="view-header">
+      <div>
+        <h1>Orçamentos e Metas</h1>
+        <p class="text-muted">Planeje seus gastos e alcance seus sonhos financeiros.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-outline" data-action="novo-orcamento">Definir Orçamento</button>
+        <button class="btn" data-action="nova-meta">+ Nova Meta</button>
+      </div>
+    </div>
+
+    <!-- Seção 1: Orçamentos (Teto de Gastos do Mês Atual) -->
+    <div class="card mt-4">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+        <h3>Orçamento Mensal (Mês Atual)</h3>
+        <span class="text-muted text-meta">Atualizado em tempo real</span>
+      </div>
+      
+      <div id="lista-orcamentos" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Injetado via JS -->
+      </div>
+    </div>
+
+    <!-- Seção 2: Metas (Objetivos de Longo Prazo) -->
+    <div class="card mt-4" style="margin-bottom: var(--spacing-lg);">
+      <h3>Metas Financeiras (Cofrinhos)</h3>
+      
+      <div class="dashboard-cards" id="lista-metas-cards" style="margin-top: var(--spacing-md);">
+        <!-- Injetado via JS -->
+      </div>
+    </div>
+  </template>
+
+  <!-- Formulário de Novo Orçamento -->
+  <template id="tpl-form-orcamento">
+    <form id="form-orcamento">
+      <div class="form-group text-center mb-4">
+        <p class="text-muted">Defina um limite de gastos para receber alertas antes de estourar o orçamento.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria a ser monitorada</label>
+        <select id="orc-categoria" required>
+          <!-- Categorias do usuário -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Limite Mensal (R$)</label>
+        <input type="number" id="orc-limite" step="0.01" required placeholder="Ex: 800.00">
+      </div>
+      <button type="submit" class="btn">Salvar Orçamento</button>
+    </form>
+  </template>
+
+  <!-- Formulário de Nova Meta -->
+  <template id="tpl-form-meta">
+    <form id="form-meta">
+      <div class="form-group">
+        <label class="form-label">Nome da Meta</label>
+        <input type="text" id="meta-nome" required placeholder="Ex: Trocar de Carro">
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Valor Alvo (R$)</label>
+          <input type="number" id="meta-alvo" step="0.01" required placeholder="50000.00">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Data Limite (Alvo)</label>
+          <input type="month" id="meta-data" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label text-muted">Saldo Inicial (Já guardado)</label>
+        <input type="number" id="meta-saldo" step="0.01" value="0.00">
+      </div>
+      <button type="submit" class="btn">Criar Meta</button>
+    </form>
   </template>
 
   <!-- Formulário de Nova Assinatura -->
@@ -739,6 +1352,10 @@
   <script src="js/modules/faturas.js"></script>
   <script src="js/modules/assinaturas.js"></script>
   <script src="js/modules/investimentos.js"></script>
+  <script src="js/modules/metas.js"></script>
+  <script src="js/modules/relatorios.js"></script>
+  <script src="js/modules/tools.js"></script>
+  <script src="js/modules/irpf.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -144,6 +144,32 @@ CREATE TABLE IF NOT EXISTS Bancos (
     timestamp_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabela de Orçamentos (Limites de gastos mensais por Categoria)
+CREATE TABLE IF NOT EXISTS Orcamentos (
+    id_orcamento UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    usuario_criacao UUID REFERENCES Usuarios(id_usuario) ON DELETE CASCADE,
+    id_categoria UUID REFERENCES Categoria(id_categoria) ON DELETE CASCADE,
+    valor_limite DECIMAL(15, 2) NOT NULL,
+    -- Se 'competencia' for nulo, é um limite fixo para todos os meses. 
+    -- Se preenchido (ex: '12-2026'), vale só para aquele mês específico.
+    competencia VARCHAR(7), 
+    timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp_atualizacao TIMESTAMP
+);
+
+-- Tabela de Metas (Cofrinhos e Objetivos de Longo Prazo)
+CREATE TABLE IF NOT EXISTS Metas (
+    id_meta UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    usuario_criacao UUID REFERENCES Usuarios(id_usuario) ON DELETE CASCADE,
+    nome_meta VARCHAR(100) NOT NULL,
+    valor_alvo DECIMAL(15, 2) NOT NULL,
+    saldo_acumulado DECIMAL(15, 2) DEFAULT 0.00,
+    data_alvo DATE, -- Data limite para atingir a meta
+    status_meta VARCHAR(20) DEFAULT 'em_andamento', -- 'em_andamento', 'concluida', 'pausada'
+    timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp_atualizacao TIMESTAMP
+);
+
 -- Índices para isolamento de dados (Multi-tenant)
 CREATE INDEX idx_transacoes_usuario ON Transacoes(usuario_insercao);
 CREATE INDEX idx_investimentos_usuario ON Investimentos(usuario_insercao);
@@ -158,3 +184,5 @@ CREATE INDEX idx_investimentos_data ON Investimentos(data_aplicacao);
 -- Índices para busca rápida de bancos
 CREATE INDEX idx_bancos_nome_curto ON Bancos(nome_curto);
 CREATE INDEX idx_bancos_nome_completo ON Bancos(nome_completo);
+CREATE INDEX idx_orcamentos_usuario ON Orcamentos(usuario_criacao);
+CREATE INDEX idx_metas_usuario ON Metas(usuario_criacao);

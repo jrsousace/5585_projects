@@ -95,7 +95,7 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(22, 132, 91, 0.15); 
 }
 
 .btn {
@@ -126,7 +126,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-outline:hover {
-  background-color: rgba(37, 99, 235, 0.05);
+  background-color: rgba(22, 132, 91, 0.05); 
 }
 
 /* Layout */

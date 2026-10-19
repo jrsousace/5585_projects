@@ -177,6 +177,25 @@ const appState = {
     return this.fetchAuth('/investments'); // Rota do backend já pronta
   },
 
+  // --- MÓDULO DE METAS E ORÇAMENTO ---
+  async fetchMetas() {
+    if (CONFIG.USE_MOCKS) {
+      return [
+        { id: 'm1', nome: 'Reserva de Emergência', alvo: 15000.00, atual: 11200.00, vinculo: 'inv3' },
+        { id: 'm2', nome: 'Viagem Japão', alvo: 25000.00, atual: 4500.00, vinculo: 'inv1' },
+        { id: 'm3', nome: 'Troca de Carro', alvo: 40000.00, atual: 40000.00, vinculo: 'none' }
+      ];
+    }
+    return [];
+  },
+
+  async fetchOrcamentoMensal() {
+    if (CONFIG.USE_MOCKS) {
+      return { teto: 6000.00, gasto: 4850.50 };
+    }
+    return { teto: 0, gasto: 0 };
+  },
+
   async salvarEntidadeSimples(endpoint, payload) {
     if (CONFIG.USE_MOCKS) return payload;
     // const res = await this.fetchAuth(endpoint, { method: 'POST', body: JSON.stringify(payload) }); return res;

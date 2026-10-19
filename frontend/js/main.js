@@ -167,6 +167,11 @@ function setupEventDelegation() {
       abrirModalInvestimento(e.target.getAttribute('data-id'));
     }
 
+    // Botão Nova Meta
+    if (e.target.matches('[data-action="nova-meta"]')) {
+      abrirModalNovaMeta();
+    }
+
     // Botão Nova Categoria (Módulo Cadastros)
     if (e.target.matches('[data-action="nova-categoria"]')) {
       abrirModalNovaCategoria();
@@ -480,6 +485,32 @@ async function abrirModalInvestimento(id = null) {
     setTimeout(() => {
       modalBackdrop.style.display = 'none';
       const event = new CustomEvent('routeChanged', { detail: { path: '/investimentos' } });
+      document.dispatchEvent(event);
+    }, 500);
+  });
+
+  modalBackdrop.style.display = 'flex';
+}
+
+function abrirModalNovaMeta() {
+  const modalBackdrop = document.getElementById('modal-backdrop');
+  const modalBody = document.getElementById('modal-body-content');
+  const tplForm = document.getElementById('tpl-form-meta');
+  
+  document.getElementById('modal-title').textContent = 'Nova Meta';
+  modalBody.innerHTML = '';
+  modalBody.appendChild(tplForm.content.cloneNode(true));
+  
+  const form = document.getElementById('form-meta');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    setTimeout(() => {
+      modalBackdrop.style.display = 'none';
+      const event = new CustomEvent('routeChanged', { detail: { path: '/metas' } });
       document.dispatchEvent(event);
     }, 500);
   });
