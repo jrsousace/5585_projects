@@ -8,10 +8,11 @@ exports.getTransactions = async (req, res) => {
     const query = `
       SELECT 
         t.id_transacao, 
-        t.data_evento, 
+        t.data_vencimento, 
+        t.data_pagamento,
         t.valor_total, 
         t.tipo, 
-        t.status,
+        t.transacao_status,
         d.descricao, 
         c.nome_categoria as categoria,
         fp.forma_pagamento
@@ -20,7 +21,7 @@ exports.getTransactions = async (req, res) => {
       LEFT JOIN Categoria c ON d.id_categoria = c.id_categoria
       LEFT JOIN Forma_Pagamento fp ON t.id_forma_pg = fp.id_forma_pg
       WHERE t.usuario_insercao = $1
-      ORDER BY t.data_evento DESC
+      ORDER BY t.data_vencimento DESC
     `;
     
     const { rows } = await db.query(query, [userId]);
@@ -34,7 +35,11 @@ exports.getTransactions = async (req, res) => {
 exports.createTransaction = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { data_evento, competencia, valor_total, tipo, status, descricao, id_categoria, id_forma_pg, id_conta } = req.body;
+    const { 
+      data_vencimento, data_pagamento, competencia, valor_total, tipo, 
+      transacao_status, descricao, id_categoria, id_forma_pg, id_conta, 
+      parcela_atual, total_parcelas, observacao 
+    } = req.body;
 
     // 1. Inserir ou buscar a Descrição (para manter a integridade da modelagem)
     let idDescricao = null;
@@ -50,13 +55,13 @@ exports.createTransaction = async (req, res) => {
     // 2. Inserir a Transação
     const insertQuery = `
       INSERT INTO Transacoes 
-        (usuario_insercao, data_evento, competencia, id_descricao, valor_total, tipo, status, id_forma_pg, id_conta)
+        (usuario_insercao, data_vencimento, data_pagamento, competencia, id_descricao, valor_total, tipo, transacao_status, id_forma_pg, id_conta, parcela_atual, total_parcelas, observacao)
       VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
     `;
     const { rows } = await db.query(insertQuery, [
-      userId, data_evento, competencia, idDescricao, valor_total, tipo, status, id_forma_pg, id_conta
+      userId, data_vencimento, data_pagamento, competencia, idDescricao, valor_total, tipo, transacao_status, id_forma_pg, id_conta, parcela_atual, total_parcelas, observacao
     ]);
 
     res.status(201).json(rows[0]);

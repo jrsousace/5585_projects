@@ -10,17 +10,14 @@ CREATE TABLE IF NOT EXISTS Usuarios (
     assinatura_plano VARCHAR(50) DEFAULT 'basic',
     status_conta VARCHAR(50) DEFAULT 'ativo',
     deleted_at TIMESTAMP,
-    -- Mantido apenas o padrão de auditoria
     timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    usuario_criacao UUID REFERENCES Usuarios(id_usuario),
-    timestamp_atualizacao TIMESTAMP,
-    usuario_atualizacao UUID REFERENCES Usuarios(id_usuario)
+    timestamp_atualizacao TIMESTAMP
 );
 
 -- Módulo Orçamento Doméstico
-CREATE TABLE IF NOT EXISTS Categoria (
-    id_categoria UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    nome_categoria VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS Centro_Custo (
+    id_cc UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    centro_custo VARCHAR(100) NOT NULL,
     timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_criacao UUID REFERENCES Usuarios(id_usuario),
     timestamp_atualizacao TIMESTAMP,
@@ -30,6 +27,17 @@ CREATE TABLE IF NOT EXISTS Categoria (
 CREATE TABLE IF NOT EXISTS Grupo (
     id_grupo UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     grupo VARCHAR(100) NOT NULL,
+    id_cc UUID REFERENCES Centro_Custo(id_cc),
+    timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_criacao UUID REFERENCES Usuarios(id_usuario),
+    timestamp_atualizacao TIMESTAMP,
+    usuario_atualizacao UUID REFERENCES Usuarios(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS Categoria (
+    id_categoria UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nome_categoria VARCHAR(100) NOT NULL,
+    id_grupo UUID REFERENCES Grupo(id_grupo),
     timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_criacao UUID REFERENCES Usuarios(id_usuario),
     timestamp_atualizacao TIMESTAMP,
@@ -39,15 +47,6 @@ CREATE TABLE IF NOT EXISTS Grupo (
 CREATE TABLE IF NOT EXISTS Forma_Pagamento (
     id_forma_pg UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     forma_pagamento VARCHAR(100) NOT NULL,
-    timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    usuario_criacao UUID REFERENCES Usuarios(id_usuario),
-    timestamp_atualizacao TIMESTAMP,
-    usuario_atualizacao UUID REFERENCES Usuarios(id_usuario)
-);
-
-CREATE TABLE IF NOT EXISTS Centro_Custo (
-    id_cc UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    centro_custo VARCHAR(100) NOT NULL,
     timestamp_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario_criacao UUID REFERENCES Usuarios(id_usuario),
     timestamp_atualizacao TIMESTAMP,
@@ -137,6 +136,14 @@ CREATE TABLE IF NOT EXISTS Investimentos (
     timestamp_atualizacao TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS Bancos (
+    compe VARCHAR(10) PRIMARY KEY, -- O código de 3 dígitos (ex: 341 para Itaú)
+    ispb VARCHAR(8) NOT NULL,      -- Código usado no PIX
+    nome_curto VARCHAR(100),
+    nome_completo VARCHAR(255),
+    timestamp_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Índices para isolamento de dados (Multi-tenant)
 CREATE INDEX idx_transacoes_usuario ON Transacoes(usuario_insercao);
 CREATE INDEX idx_investimentos_usuario ON Investimentos(usuario_insercao);
@@ -144,6 +151,10 @@ CREATE INDEX idx_categorias_usuario ON Categoria(usuario_criacao);
 CREATE INDEX idx_contas_usuario ON Conta(usuario_criacao);
 
 -- Índices para Dashboards (Buscas por data e competência são constantes)
-CREATE INDEX idx_transacoes_data ON Transacoes(data_evento);
+CREATE INDEX idx_transacoes_data ON Transacoes(data_vencimento);
 CREATE INDEX idx_transacoes_competencia ON Transacoes(competencia);
 CREATE INDEX idx_investimentos_data ON Investimentos(data_aplicacao);
+
+-- Índices para busca rápida de bancos
+CREATE INDEX idx_bancos_nome_curto ON Bancos(nome_curto);
+CREATE INDEX idx_bancos_nome_completo ON Bancos(nome_completo);

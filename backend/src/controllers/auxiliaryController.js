@@ -60,3 +60,13 @@ exports.createConta = async (req, res) => {
     res.status(500).json({ message: 'Erro ao criar conta' });
   }
 };
+
+// --- BANCOS ---
+exports.getBancos = async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT compe, ispb, nome_curto, nome_completo FROM Bancos ORDER BY nome_completo');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar lista de bancos' });
+  }
+};

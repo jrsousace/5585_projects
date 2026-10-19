@@ -16,4 +16,7 @@ router.get('/formas-pagamento', auxiliaryController.getFormasPagamento);
 router.get('/contas', auxiliaryController.getContas);
 router.post('/contas', auxiliaryController.createConta);
 
+// Rotas de Bancos
+router.get('/bancos', auxiliaryController.getBancos);
+
 module.exports = router;

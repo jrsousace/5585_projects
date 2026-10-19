@@ -62,6 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- LÓGICA DE LOGIN ---
   if (loginForm) {
+    // Configura o tema do login antes de carregar
+    const currentTheme = localStorage.getItem('theme') || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (currentTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       

@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SaaS Financeiro - Dashboard</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#16845B">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/dashboard.css">
 </head>
@@ -21,7 +24,16 @@
         <!-- Navegação injetada dinamicamente pelo JS (Fase 3) -->
       </nav>
       <div class="sidebar-footer">
-        <button id="btn-logout" class="btn btn-outline" style="width: 100%;">Sair</button>
+        <div class="nav-accordion">
+          <button class="nav-accordion-btn" id="btn-config">⚙️ Configurações <span class="arrow">▼</span></button>
+          <div class="nav-submenu">
+            <a href="#/config/perfil" class="nav-item nav-sub-item" data-link>Perfil do Titular</a>
+            <a href="#/config/dependentes" class="nav-item nav-sub-item" data-link>Dependentes / Subcontas</a>
+            <a href="#/config/bancos" class="nav-item nav-sub-item" data-link>Bancos (Febraban)</a>
+            <a href="#/config/assinatura" class="nav-item nav-sub-item" data-link>Assinatura e Faturamento</a>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Sair</button>
       </div>
     </aside>
 
@@ -29,8 +41,16 @@
     <main class="main-content">
       <header class="topbar">
         <button id="btn-menu-toggle" class="menu-toggle">☰</button>
-        <div class="user-info">
-          <span id="user-name">Carregando...</span>
+        
+        <!-- Nova seção de ferramentas no topbar -->
+        <div class="topbar-actions">
+          <button id="btn-theme-toggle" class="theme-toggle" title="Alternar Tema">
+            <span class="icon-moon">🌙</span>
+            <span class="icon-sun" style="display: none;">☀️</span>
+          </button>
+          <div class="user-info">
+            <span id="user-name">Carregando...</span>
+          </div>
         </div>
       </header>
 
@@ -48,12 +68,12 @@
       <p>Bem-vindo ao seu painel financeiro.</p>
     </div>
     <div class="dashboard-cards">
-      <div class="card">
+      <div class="card card-featured">
         <h3>Saldo Atual</h3>
         <p class="h2">R$ <span id="dash-saldo">0,00</span></p>
       </div>
       <div class="card">
-        <h3>Despesas (Mês)</h3>
+        <h3 class="text-muted">Despesas (Mês)</h3>
         <p class="h2" style="color: var(--error-color);">R$ <span id="dash-despesas">0,00</span></p>
       </div>
     </div>
@@ -69,7 +89,7 @@
   <!-- Template: Orçamento Doméstico -->
   <template id="tpl-orcamento">
     <div class="view-header">
-      <h1>Orçamento Doméstico</h1>
+      <h1>Transações</h1>
       <button class="btn" data-action="nova-transacao">Nova Transação</button>
     </div>
     
@@ -88,6 +108,143 @@
           </thead>
           <tbody id="lista-transacoes">
             <!-- Renderizado via JS DocumentFragment -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Faturas (Cartões e Diversas) -->
+  <template id="tpl-faturas">
+    <div class="view-header">
+      <div>
+        <h1>Faturas e Extratos</h1>
+        <p class="text-muted">Gestão automatizada e revisão de faturas de cartões.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-outline" data-action="conectar-open-finance" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>🔗</span> Open Finance
+        </button>
+        <button class="btn" data-action="importar-fatura" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>📄</span> Leitura OCR (IA)
+        </button>
+      </div>
+    </div>
+    
+    <div class="card mt-4">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Vencimento</th>
+              <th>Cartão / Referência</th>
+              <th>Valor Total</th>
+              <th>Status</th>
+              <th style="width: 120px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-faturas">
+            <!-- Renderizado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Cadastros -> Bancos (Apenas Leitura) -->
+  <template id="tpl-cadastros-bancos">
+    <div class="view-header">
+      <h1>Bancos</h1>
+      <p class="text-muted">Instituições financeiras em funcionamento no país (BACEN / BrasilAPI)</p>
+    </div>
+    <div class="card mt-4">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 100px;">COMPE</th>
+              <th style="width: 120px;">ISPB (Pix)</th>
+              <th>Nome Reduzido</th>
+              <th>Nome Completo</th>
+            </tr>
+          </thead>
+          <tbody id="lista-bancos">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Cadastros -> Contas -->
+  <template id="tpl-cadastros-contas">
+    <div class="view-header">
+      <h1>Contas e Cartões</h1>
+      <button class="btn" data-action="nova-conta">Nova Conta</button>
+    </div>
+    <div class="card mt-4">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome da Conta</th>
+              <th>Banco</th>
+              <th>Ag/CC</th>
+              <th style="width: 100px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-contas">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Cadastros -> Grupos e Categorias -->
+  <template id="tpl-cadastros-categorias">
+    <div class="view-header">
+      <h1>Grupos e Categorias</h1>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+      <!-- Grupos -->
+      <div class="card mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>Grupos</h3>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" data-action="novo-grupo">+ Grupo</button>
+        </div>
+        <table class="data-table">
+          <tbody id="lista-grupos"></tbody>
+        </table>
+      </div>
+      <!-- Categorias -->
+      <div class="card mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>Categorias</h3>
+          <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" data-action="nova-categoria">+ Categoria</button>
+        </div>
+        <table class="data-table">
+          <tbody id="lista-categorias"></tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Cadastros -> Listagem Simples (Centros, Formas PG, Investimentos) -->
+  <template id="tpl-cadastros-simples">
+    <div class="view-header">
+      <h1 id="view-title-simples">Cadastros</h1>
+      <p id="view-desc-simples" class="text-muted" style="display: none;"></p>
+      <button class="btn" id="btn-novo-simples">Novo</button>
+    </div>
+    <div class="card mt-4">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th id="table-header-simples">Nome</th>
+              <th style="width: 100px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-simples">
           </tbody>
         </table>
       </div>
@@ -118,19 +275,458 @@
         </select>
       </div>
       <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="t-status" required>
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
+          <option value="atrasado">Atrasado</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Descrição</label>
         <input type="text" id="t-descricao" required placeholder="Ex: Supermercado">
       </div>
       <div class="form-group">
-        <label class="form-label">Valor (R$)</label>
+        <label class="form-label">Valor Total (R$)</label>
         <input type="number" id="t-valor" step="0.01" required placeholder="0.00">
       </div>
       <div class="form-group">
-        <label class="form-label">Data</label>
-        <input type="date" id="t-data" required>
+        <label class="form-label">Data de Vencimento</label>
+        <input type="date" id="t-data-venc" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label text-muted">Data de Pagamento (Opcional)</label>
+        <input type="date" id="t-data-pag">
+      </div>
+      <div class="form-group">
+        <label class="form-label text-muted">Observação</label>
+        <textarea id="t-obs" placeholder="Detalhes opcionais..." rows="2"></textarea>
       </div>
       <button type="submit" class="btn">Salvar Transação</button>
     </form>
+  </template>
+
+  <!-- Formulário de Categoria (Escondido) -->
+  <template id="tpl-form-categoria">
+    <form id="form-categoria">
+      <div class="form-group">
+        <label class="form-label">Nome da Categoria</label>
+        <input type="text" id="cat-nome" required placeholder="Ex: Educação Infantil">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pertence ao Grupo</label>
+        <select id="cat-grupo" required></select>
+      </div>
+      <button type="submit" class="btn">Salvar Categoria</button>
+    </form>
+  </template>
+
+  <!-- Formulário de Grupo -->
+  <template id="tpl-form-grupo">
+    <form id="form-grupo">
+      <div class="form-group">
+        <label class="form-label">Nome do Grupo</label>
+        <input type="text" id="g-nome" required placeholder="Ex: Despesas Fixas">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Centro de Custo</label>
+        <select id="g-cc" required></select>
+      </div>
+      <button type="submit" class="btn">Salvar Grupo</button>
+    </form>
+  </template>
+
+  <!-- Formulário de Entidade Simples (Reutilizável) -->
+  <template id="tpl-form-simples">
+    <form id="form-simples">
+      <div class="form-group">
+        <label class="form-label" id="label-nome-simples">Nome</label>
+        <input type="text" id="input-nome-simples" required>
+        <input type="hidden" id="input-tipo-simples">
+      </div>
+      <button type="submit" class="btn">Salvar</button>
+    </form>
+  </template>
+
+  <!-- Formulário de Conta -->
+  <template id="tpl-form-conta">
+    <form id="form-conta">
+      <div class="form-group">
+        <label class="form-label">Nome da Conta / Cartão / Carteira</label>
+        <input type="text" id="c-nome" required placeholder="Ex: Conta Corrente Itaú ou Carteira Física">
+      </div>
+      
+      <div class="form-group" style="position: relative;">
+        <label class="form-label text-muted">Instituição Financeira (Opcional)</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="c-banco-nome" placeholder="Ex: Nubank (Deixe em branco se for Dinheiro Físico)" style="flex: 1;">
+          <input type="hidden" id="c-banco-codigo">
+          <button type="button" class="btn btn-outline" id="btn-buscar-banco" style="min-height: auto; padding: 0 1rem;" title="Buscar Instituição Oficial">🔍</button>
+        </div>
+        
+        <!-- Dropdown de Busca de Bancos (Escondido) -->
+        <div id="bancos-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; z-index: 100;">
+          <ul id="bancos-list" style="list-style: none; margin: 0; padding: 0;">
+            <!-- Injetado via JS -->
+          </ul>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label text-muted">Agência</label>
+          <input type="text" id="c-agencia">
+        </div>
+        <div class="form-group" style="flex: 2;">
+          <label class="form-label text-muted">Conta</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="c-num" style="flex: 3;">
+            <span style="display: flex; align-items: center; color: var(--text-muted);">-</span>
+            <input type="text" id="c-digito" style="flex: 1;" placeholder="Díg.">
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn">Salvar Conta</button>
+    </form>
+  </template>
+
+  <!-- Formulário de Importação de Fatura (Upload/OCR) -->
+  <template id="tpl-form-import">
+    <form id="form-import">
+      <div class="form-group text-center mb-4">
+        <p class="text-muted text-meta">Nossa IA (Gemini Vision) fará a leitura óptica (OCR) do seu documento e extrairá todos os lançamentos para você revisar.</p>
+      </div>
+      
+      <div class="form-group mb-4">
+        <label class="form-label">Tipo de Documento</label>
+        <select id="f-tipo-doc" required>
+          <option value="cartao">Fatura de Cartão de Crédito</option>
+          <option value="consumo">Conta de Consumo (Água, Luz, Internet)</option>
+          <option value="nota_fiscal">Nota Fiscal (Supermercado, Lojas)</option>
+          <option value="extrato">Extrato Bancário (PDF/OFX)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="upload-zone" id="upload-zone">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📄</div>
+          <span id="upload-text" style="font-weight: 500;">Clique ou arraste o arquivo aqui</span>
+          <p class="text-meta text-muted mt-4">Aceita PDF, PNG e JPG</p>
+          <input type="file" id="f-arquivo" accept=".pdf,image/png,image/jpeg" style="display:none;">
+        </div>
+      </div>
+      <button type="submit" class="btn">Processar com Inteligência Artificial</button>
+    </form>
+  </template>
+
+  <!-- Modal de Open Finance (Mock Connect) -->
+  <template id="tpl-open-finance">
+    <div class="text-center" style="padding: var(--spacing-lg) 0;">
+      <div style="font-size: 3rem; margin-bottom: var(--spacing-md);">🏦</div>
+      <h3 style="margin-bottom: var(--spacing-sm);">Sincronização Bancária</h3>
+      <p class="text-muted mb-4" style="font-size: var(--text-body);">Conecte-se com segurança utilizando as APIs oficiais do Open Finance Brasil. Extratos e faturas de cartão cairão direto no sistema.</p>
+      <div class="form-group" style="text-align: left; margin-bottom: var(--spacing-lg);">
+        <label class="form-label">Selecione o seu Banco</label>
+        <select id="of-banco" required>
+          <option value="ita">Itaú Unibanco</option>
+          <option value="nu">Nubank</option>
+          <option value="c6">C6 Bank</option>
+          <option value="bra">Bradesco</option>
+          <option value="bb">Banco do Brasil</option>
+        </select>
+      </div>
+      <button type="button" class="btn" id="btn-conectar-of" style="width: 100%;">Conectar com o Banco</button>
+      <p class="text-meta text-muted mt-4" style="font-size: 0.75rem;">Protegido por criptografia de ponta a ponta (Bacen).</p>
+    </div>
+  </template>
+
+  <!-- Template: Revisão Pós OCR / Open Finance -->
+  <template id="tpl-revisao-fatura">
+    <div>
+      <div style="background: rgba(22, 132, 91, 0.1); border-left: 4px solid var(--primary-color); padding: var(--spacing-sm) var(--spacing-md); margin-bottom: var(--spacing-lg);">
+        <strong>Sucesso!</strong> Foram encontrados <strong><span id="ocr-count">0</span> lançamentos</strong>. Revise-os antes de gravar no seu Orçamento.
+      </div>
+      <div style="max-height: 350px; overflow-y: auto; margin-bottom: var(--spacing-lg); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+        <table class="data-table" style="font-size: var(--text-meta);">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição Extraída</th>
+              <th>Valor (R$)</th>
+            </tr>
+          </thead>
+          <tbody id="lista-revisao-ocr">
+            <!-- Itens extraídos -->
+          </tbody>
+        </table>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
+        <span class="h3" style="margin:0;">Total: R$ <span id="ocr-total" style="color: var(--error-color);">0,00</span></span>
+        <button type="button" class="btn" id="btn-confirmar-fatura">Salvar no Orçamento</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Assinaturas e Recorrências -->
+  <template id="tpl-assinaturas">
+    <div class="view-header">
+      <div>
+        <h1>Assinaturas e Recorrências</h1>
+        <p class="text-muted">Acompanhe seus contratos mensais e serviços digitais (Streaming, SaaS, etc).</p>
+      </div>
+      <button class="btn" data-action="nova-assinatura">+ Adicionar Assinatura</button>
+    </div>
+    
+    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
+      <div class="card card-featured">
+        <h3>Comprometimento Mensal</h3>
+        <p class="h2">R$ <span id="ass-total">0,00</span></p>
+      </div>
+      <div class="card">
+        <h3 class="text-muted">Próxima Renovação</h3>
+        <p class="h2" style="color: var(--warning-color);" id="ass-prox">---</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Serviço / Contrato</th>
+              <th>Categoria</th>
+              <th>Próxima Cobrança</th>
+              <th>Valor (R$)</th>
+              <th>Status</th>
+              <th style="width: 80px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-assinaturas">
+            <!-- Renderizado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Investimentos -->
+  <template id="tpl-investimentos">
+    <div class="view-header">
+      <div>
+        <h1>Carteira de Investimentos</h1>
+        <p class="text-muted">Acompanhe a evolução do seu patrimônio e rentabilidade.</p>
+      </div>
+      <button class="btn" data-action="novo-investimento">+ Novo Aporte</button>
+    </div>
+    
+    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
+      <div class="card card-featured">
+        <h3>Patrimônio Investido</h3>
+        <p class="h2">R$ <span id="inv-total">0,00</span></p>
+      </div>
+      <div class="card">
+        <h3 class="text-muted">Distribuição (Por Tipo)</h3>
+        <div style="position: relative; height:120px; width:100%; margin-top: var(--spacing-sm);">
+          <canvas id="investmentsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ativo</th>
+              <th>Tipo</th>
+              <th>Data Aplicação</th>
+              <th>Vencimento</th>
+              <th>Indexador / Taxa</th>
+              <th>Valor Investido</th>
+              <th style="width: 80px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-investimentos">
+            <!-- Renderizado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Formulário de Nova Assinatura -->
+  <template id="tpl-form-assinatura">
+    <form id="form-assinatura">
+      <div class="form-group">
+        <label class="form-label">Nome do Serviço</label>
+        <input type="text" id="a-nome" required placeholder="Ex: Netflix, Spotify, AWS">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor Mensal (R$)</label>
+        <input type="number" id="a-valor" step="0.01" required placeholder="0.00">
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Dia do Vencimento</label>
+          <input type="number" id="a-dia" min="1" max="31" required placeholder="Ex: 15">
+        </div>
+        <div class="form-group" style="flex: 2;">
+          <label class="form-label">Cartão / Forma PG</label>
+          <select id="a-forma-pg" required>
+            <option value="Nubank">Cartão Nubank</option>
+            <option value="Itaú">Cartão Itaú</option>
+            <option value="Pix">PIX Recorrente</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status da Assinatura</label>
+        <select id="a-status" required>
+          <option value="Ativo">Ativo (Cobrando todo mês)</option>
+          <option value="Pausado">Pausado / Cancelado</option>
+        </select>
+      </div>
+      <button type="submit" class="btn mt-4">Salvar Assinatura</button>
+    </form>
+  </template>
+  <!-- Formulário de Novo Investimento -->
+  <template id="tpl-form-investimento">
+    <form id="form-investimento">
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 2;">
+          <label class="form-label">Ativo (Ticker/Nome)</label>
+          <input type="text" id="i-ativo" required placeholder="Ex: PETR4, Tesouro Selic 2029">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Tipo</label>
+          <select id="i-tipo" required></select>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Valor do Aporte (R$)</label>
+          <input type="number" id="i-valor" step="0.01" required placeholder="0.00">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Data da Aplicação</label>
+          <input type="date" id="i-data-app" required>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label text-muted">Indexador</label>
+          <select id="i-indexador">
+            <option value="Pré-fixado">Pré-fixado</option>
+            <option value="CDI">CDI</option>
+            <option value="IPCA">IPCA</option>
+            <option value="Selic">Selic</option>
+            <option value="Ações/FIIs">Renda Variável</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label text-muted">Taxa Contratada (%)</label>
+          <input type="number" id="i-taxa" step="0.01" placeholder="Ex: 110 (110% CDI)">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label text-muted">Vencimento</label>
+          <input type="date" id="i-vencimento">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Conta (Corretora / Banco)</label>
+        <select id="i-conta" required></select>
+      </div>
+
+      <button type="submit" class="btn mt-4">Salvar Investimento</button>
+    </form>
+  </template>
+  <!-- Template: Configurações -> Perfil do Titular -->
+  <template id="tpl-config-perfil">
+    <div class="view-header">
+      <h1>Perfil do Titular</h1>
+    </div>
+    <div class="card mt-4" style="max-width: 600px;">
+      <form id="form-perfil">
+        <div class="form-group">
+          <label class="form-label">Nome Completo</label>
+          <input type="text" id="perfil-nome" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail de Acesso</label>
+          <input type="email" id="perfil-email" disabled class="text-muted">
+        </div>
+        <button type="button" class="btn mt-4">Salvar Alterações</button>
+      </form>
+    </div>
+  </template>
+
+  <!-- Template: Configurações -> Dependentes -->
+  <template id="tpl-config-dependentes">
+    <div class="view-header">
+      <h1>Dependentes e Subcontas</h1>
+      <button class="btn" data-action="novo-dependente">Convidar Membro</button>
+    </div>
+    <div class="card mt-4">
+      <p class="text-muted mb-4">Compartilhe o acesso da sua conta com familiares. Eles terão um login próprio e você define o nível de permissão deles.</p>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Nível de Acesso</th>
+              <th style="width: 100px; text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-dependentes">
+            <tr><td colspan="4" class="text-center text-muted">Nenhum dependente cadastrado no seu plano.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Configurações -> Assinatura -->
+  <template id="tpl-config-assinatura">
+    <div class="view-header">
+      <h1>Assinatura e Faturamento</h1>
+    </div>
+    <div class="card mt-4" style="max-width: 600px;">
+      <h3>Seu Plano Atual</h3>
+      <div class="upsell-container mt-4" style="background: var(--bg-color); border: 1px solid var(--border-color); padding: var(--spacing-lg);">
+        <h2 id="plan-name" style="color: var(--primary-color); text-transform: uppercase;">Carregando...</h2>
+        <p class="text-muted mt-4">Status da Assinatura: <strong style="color: var(--success-color);">Ativo</strong></p>
+        <hr style="margin: 1rem 0; border: 0; border-top: 1px solid var(--border-color);">
+        <p class="text-muted"><strong>Módulos liberados:</strong> <span id="plan-modules">...</span></p>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        <button class="btn" style="flex: 1;">Fazer Upgrade</button>
+        <button class="btn btn-outline" style="flex: 1; border-color: var(--error-color); color: var(--error-color);">Cancelar Plano</button>
+      </div>
+    </div>
+    
+    <div class="card mt-4" style="max-width: 600px;">
+      <h3>Histórico de Faturamento</h3>
+      <div class="table-responsive mt-4">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Recibo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="text-center text-muted">Nenhum faturamento registrado.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </template>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -139,6 +735,10 @@
   <script src="js/router.js"></script>
   <script src="js/modules/budget.js"></script>
   <script src="js/modules/dashboard.js"></script>
+  <script src="js/modules/config.js"></script>
+  <script src="js/modules/faturas.js"></script>
+  <script src="js/modules/assinaturas.js"></script>
+  <script src="js/modules/investimentos.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

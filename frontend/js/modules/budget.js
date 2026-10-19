@@ -3,7 +3,7 @@
 document.addEventListener('routeChanged', (e) => {
   const { path, route } = e.detail;
   
-  if (path === '/orcamento' && appState.hasModuleAccess('budget')) {
+  if (path === '/transacoes' && appState.hasModuleAccess('budget')) {
     initBudgetModule();
   }
 });
@@ -47,13 +47,17 @@ function renderTransactionsTable(transactions) {
     const tr = document.createElement('tr');
     
     // Formatando valores e data
-    const date = new Date(t.data_evento).toLocaleDateString('pt-BR');
+    const date = new Date(t.data_vencimento).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
     const value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.valor_total);
     const valueColor = t.tipo === 'despesa' ? 'var(--error-color)' : 'var(--success-color)';
     const formaPg = t.forma_pagamento || '-';
     
     tr.innerHTML = `
-      <td>${date}</td>
+      <td>
+        ${date}
+        ${t.transacao_status === 'atrasado' ? '<br><small style="color:var(--error-color)">Atrasado</small>' : ''}
+        ${t.transacao_status === 'pendente' ? '<br><small style="color:var(--warning-color)">Pendente</small>' : ''}
+      </td>
       <td>${t.descricao}</td>
       <td>${t.categoria || '-'}</td>
       <td>${formaPg}</td>
@@ -76,7 +80,9 @@ function mockFetchTransactions() {
       resolve([
         {
           id_transacao: 'uuid-1',
-          data_evento: '2023-10-15',
+          data_vencimento: '2023-10-15',
+          data_pagamento: '2023-10-15',
+          transacao_status: 'pago',
           descricao: 'Supermercado',
           categoria: 'Alimentação',
           forma_pagamento: 'Cartão de Crédito',
@@ -85,7 +91,9 @@ function mockFetchTransactions() {
         },
         {
           id_transacao: 'uuid-2',
-          data_evento: '2023-10-16',
+          data_vencimento: '2023-10-16',
+          data_pagamento: '2023-10-16',
+          transacao_status: 'pago',
           descricao: 'Salário',
           categoria: 'Renda Fixa',
           forma_pagamento: 'PIX',
@@ -94,7 +102,9 @@ function mockFetchTransactions() {
         },
         {
           id_transacao: 'uuid-3',
-          data_evento: '2023-10-18',
+          data_vencimento: '2023-10-18',
+          data_pagamento: null,
+          transacao_status: 'pendente',
           descricao: 'Conta de Luz',
           categoria: 'Moradia',
           forma_pagamento: 'Débito Automático',

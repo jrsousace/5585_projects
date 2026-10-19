@@ -21,17 +21,21 @@ exports.getInvestments = async (req, res) => {
 exports.createInvestment = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { ativo, data_aplicacao, valor_investido, rentabilidade_esperada, vencimento, id_tipo_investimento } = req.body;
+    const { 
+      ativo, data_aplicacao, valor_investido, rentabilidade_esperada, 
+      vencimento, id_tipo_investimento, id_conta, quantidade, preco_unitario, 
+      indexador, taxa_contratada 
+    } = req.body;
 
     const insertQuery = `
       INSERT INTO Investimentos 
-        (ativo, data_aplicacao, valor_investido, rentabilidade_esperada, vencimento, id_tipo_investimento, usuario_insercao)
+        (ativo, data_aplicacao, valor_investido, rentabilidade_esperada, vencimento, id_tipo_investimento, usuario_insercao, id_conta, quantidade, preco_unitario, indexador, taxa_contratada)
       VALUES 
-        ($1, $2, $3, $4, $5, $6, $7)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `;
     const { rows } = await db.query(insertQuery, [
-      ativo, data_aplicacao, valor_investido, rentabilidade_esperada, vencimento, id_tipo_investimento, userId
+      ativo, data_aplicacao, valor_investido, rentabilidade_esperada, vencimento, id_tipo_investimento, userId, id_conta, quantidade, preco_unitario, indexador, taxa_contratada
     ]);
 
     res.status(201).json(rows[0]);

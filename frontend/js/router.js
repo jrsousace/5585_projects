@@ -3,7 +3,19 @@
 const router = {
   routes: {
     '/': { templateId: 'tpl-dashboard', title: 'Dashboard', module: null },
-    '/orcamento': { templateId: 'tpl-orcamento', title: 'Orçamento Doméstico', module: 'budget' }
+    '/transacoes': { templateId: 'tpl-orcamento', title: 'Transações', module: 'budget' },
+    '/faturas': { templateId: 'tpl-faturas', title: 'Faturas e Contas', module: 'premium' },
+    '/assinaturas': { templateId: 'tpl-assinaturas', title: 'Assinaturas', module: 'premium' },
+    '/investimentos': { templateId: 'tpl-investimentos', title: 'Investimentos', module: 'investments' },
+    '/config/bancos': { templateId: 'tpl-cadastros-bancos', title: 'Bancos', module: null },
+    '/cadastros/contas': { templateId: 'tpl-cadastros-contas', title: 'Contas e Cartões', module: null },
+    '/cadastros/categorias': { templateId: 'tpl-cadastros-categorias', title: 'Grupos e Categorias', module: null },
+    '/cadastros/centros-custo': { templateId: 'tpl-cadastros-simples', title: 'Centros de Custo', module: null },
+    '/cadastros/formas-pgto': { templateId: 'tpl-cadastros-simples', title: 'Formas de Pagamento', module: null },
+    '/cadastros/tipos-invest': { templateId: 'tpl-cadastros-simples', title: 'Tipos de Investimento', module: null },
+    '/config/perfil': { templateId: 'tpl-config-perfil', title: 'Perfil do Titular', module: null },
+    '/config/dependentes': { templateId: 'tpl-config-dependentes', title: 'Dependentes', module: 'premium' },
+    '/config/assinatura': { templateId: 'tpl-config-assinatura', title: 'Assinatura', module: null }
   },
 
   init() {

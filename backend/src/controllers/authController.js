@@ -24,17 +24,33 @@ exports.register = async (req, res) => {
     const newUser = await db.query(insertQuery, [nome, email, senhaHash, 'basic']);
     const userId = newUser.rows[0].id_usuario;
 
-    // 4. Seeding: Criar categorias padrão para este usuário
-    const defaultCategories = ['Moradia', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Salário', 'Investimentos'];
+    // 4. Seeding: Criar hierarquia de Centro de Custo -> Grupos -> Categorias
+    const ccPessoalResult = await db.query(
+      'INSERT INTO Centro_Custo (centro_custo, usuario_criacao) VALUES ($1, $2) RETURNING id_cc',
+      ['Pessoal', userId]
+    );
+    await db.query(
+      'INSERT INTO Centro_Custo (centro_custo, usuario_criacao) VALUES ($1, $2)',
+      ['MEI / Empresa', userId]
+    );
+    const idCcPessoal = ccPessoalResult.rows[0].id_cc;
+
+    const grupoFixaResult = await db.query(
+      'INSERT INTO Grupo (grupo, id_cc, usuario_criacao) VALUES ($1, $2, $3) RETURNING id_grupo',
+      ['Despesas Fixas', idCcPessoal, userId]
+    );
+    const idGrupoFixa = grupoFixaResult.rows[0].id_grupo;
+
+    const defaultCategories = ['Moradia', 'Alimentação', 'Transporte', 'Saúde', 'Lazer'];
     for (const cat of defaultCategories) {
       await db.query(
-        'INSERT INTO Categoria (nome_categoria, usuario_criacao) VALUES ($1, $2)',
-        [cat, userId]
+        'INSERT INTO Categoria (nome_categoria, id_grupo, usuario_criacao) VALUES ($1, $2, $3)',
+        [cat, idGrupoFixa, userId]
       );
     }
     
     // 5. Seeding: Formas de Pagamento padrão
-    const defaultPayments = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Transferência'];
+    const defaultPayments = ['PIX', 'Dinheiro', 'Crédito', 'Débito', 'TED', 'Voucher'];
     for (const pay of defaultPayments) {
       await db.query(
         'INSERT INTO Forma_Pagamento (forma_pagamento, usuario_criacao) VALUES ($1, $2)',

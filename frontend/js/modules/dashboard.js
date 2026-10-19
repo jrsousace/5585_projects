@@ -49,12 +49,24 @@ async function initDashboard() {
 
   const saldo = totalReceitas - totalDespesas;
   
-  document.getElementById('dash-saldo').textContent = saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  // Cores semânticas conforme a paleta (O Card Featured agora controla a cor do saldo)
+  const saldoElement = document.getElementById('dash-saldo');
+  saldoElement.textContent = saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  
   document.getElementById('dash-despesas').textContent = totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  // A cor já foi fixada no HTML para a despesa, usando var(--error-color) no style inline, mas deixamos fluida na estrutura
 
   // 2. Renderizar Gráfico de Pizza (Chart.js)
   renderChart(despesasPorCategoria);
 }
+
+// Ouvir mudanças de tema para recarregar o gráfico com novas cores
+document.addEventListener('themeChanged', () => {
+  if (expensesChartInstance) {
+    // Redesenhar pegando as variáveis do root
+    initDashboard(); 
+  }
+});
 
 function renderChart(dadosAgrupados) {
   const ctx = document.getElementById('expensesChart');
@@ -80,15 +92,16 @@ function renderChart(dadosAgrupados) {
       datasets: [{
         data: data,
         backgroundColor: [
-          '#ef4444', // Red
-          '#f97316', // Orange
-          '#eab308', // Yellow
-          '#3b82f6', // Blue
-          '#8b5cf6', // Violet
-          '#14b8a6', // Teal
-          '#64748b'  // Slate
+          '#16845B', // Verde-esmeralda
+          '#2563EB', // Informação (Azul)
+          '#A16207', // Warning
+          '#0D261C', // Verde-pinho escuro
+          '#64748B', // Cinza Secundário
+          '#C2414B', // Despesa/Perigo
+          '#153A2A'  // Verde escuro intermediário
         ],
-        borderWidth: 0
+        borderWidth: 2,
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--surface-color').trim()
       }]
     },
     options: {
@@ -96,9 +109,16 @@ function renderChart(dadosAgrupados) {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'bottom',
+          position: 'right',
+          labels: {
+            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+            font: {
+              family: "'Inter', sans-serif"
+            }
+          }
         }
-      }
+      },
+      cutout: '70%'
     }
   });
 }
