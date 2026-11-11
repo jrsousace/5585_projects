@@ -6,7 +6,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const budgetRoutes = require('./src/routes/budgetRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Middlewares
 app.use(cors()); // Permite requisições do frontend
@@ -23,6 +23,6 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/auxiliary', require('./src/routes/auxiliaryRoutes'));
 app.use('/api/investments', require('./src/routes/investmentsRoutes'));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

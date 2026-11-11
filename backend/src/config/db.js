@@ -8,6 +8,18 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
+const connectToDB = async () => {
+  try {
+    await pool.connect();
+    console.log('Conectado ao PostgreSQL');
+  } catch (err) {
+    console.error('Aviso: Falha ao conectar no banco no arranque inicial:', err.message);
+    // Opcional: tentar nova ligação após alguns segundos (retry logic)
+  }
+};
+
+connectToDB();
+
 pool.on('error', (err) => {
   console.error('Erro inesperado no cliente do PostgreSQL', err);
 });

@@ -1,8 +1,12 @@
-const CACHE_NAME = 'finance-app-v2';
+const CACHE_NAME = 'finance-app-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/login.html',
+  '/manifest.json',
+  '/assets/favicon.svg',
+  '/assets/icon-192.svg',
+  '/assets/icon-512.svg',
   '/css/main.css',
   '/css/dashboard.css',
   '/js/config.js',
