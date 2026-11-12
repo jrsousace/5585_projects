@@ -162,19 +162,53 @@ function initPerfilView() {
     nomeInput.value = appState.user.name;
     emailInput.value = appState.user.email;
   }
+  const passwordForm = document.getElementById('form-change-password');
+  if (passwordForm) {
+    passwordForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('replacement-password').value;
+      const confirmation = document.getElementById('replacement-password-confirm').value;
+      const message = document.getElementById('change-password-message');
+      if (newPassword !== confirmation) {
+        message.textContent = 'As senhas não coincidem.';
+        return;
+      }
+      const submit = passwordForm.querySelector('button[type="submit"]');
+      submit.disabled = true;
+      message.textContent = '';
+      try {
+        const result = await appState.fetchAuth('/auth/password/change', {
+          method: 'POST',
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        message.textContent = result.message;
+        appState.clear();
+        window.setTimeout(() => window.location.assign('/login'), 1200);
+      } catch (error) {
+        message.textContent = error.message;
+        submit.disabled = false;
+      }
+    });
+  }
 }
 
 function initAssinaturaView() {
   const planName = document.getElementById('plan-name');
   const planModules = document.getElementById('plan-modules');
-  
-  // Lê os dados de assinatura injetados no login (via token JWT / store)
+  const planStatus = document.getElementById('plan-status');
   if (planName && planModules && appState.user && appState.user.subscription) {
     const isPro = appState.user.subscription.plan === 'pro';
     
-    planName.textContent = isPro ? 'PRO (Premium)' : 'Basic (Gratuito)';
-    planModules.textContent = isPro 
-      ? 'Todos os módulos liberados (Investimentos, Fiscal, Dependetes, etc).' 
-      : 'Apenas Dashboard e Transações básicas.';
+    const mode = appState.dataMode();
+    planName.textContent = isPro
+      ? (mode === 'cloud' ? 'PRO (nuvem ativa)' : 'PRO (somente leitura)')
+      : 'Gratuito (armazenamento local)';
+    planModules.textContent = isPro
+      ? (appState.user.subscription.expiresAt
+          ? `Módulos disponíveis; validade até ${new Date(appState.user.subscription.expiresAt).toLocaleDateString('pt-BR')}.`
+          : 'Módulos disponíveis em modo somente leitura até a assinatura ser regularizada.')
+      : 'Módulos disponíveis com dados salvos neste navegador.';
+    planStatus.textContent = appState.user.subscription.status || 'free';
   }
 }

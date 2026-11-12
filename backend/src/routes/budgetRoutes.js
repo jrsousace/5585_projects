@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const budgetController = require('../controllers/budgetController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { requirePermission } = require('../middlewares/permissionMiddleware');
 
 // Todas as rotas de orçamento passarão pelo middleware de proteção
 router.use(authMiddleware);
 
-router.get('/transactions', budgetController.getTransactions);
-router.post('/transactions', budgetController.createTransaction);
+router.get('/transactions', requirePermission('budget', 'read'), budgetController.getTransactions);
+router.post('/transactions', requirePermission('budget', 'write'), budgetController.createTransaction);
 
 module.exports = router;

@@ -1,6 +1,15 @@
 {
   "hosting": {
     "public": "frontend",
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "api-saas",
+          "region": "southamerica-east1"
+        }
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

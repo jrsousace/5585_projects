@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>Aceitar convite - 5585 Projects</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .invite-container { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+    .invite-card { width: 100%; max-width: 440px; padding: 2rem; background: var(--surface-color); border-radius: var(--radius-lg); box-shadow: 0 4px 16px #0002; }
+    #invite-message { min-height: 1.5em; }
+  </style>
+</head>
+<body>
+  <main class="invite-container">
+    <section class="invite-card">
+      <h1>Aceitar convite</h1>
+      <p class="text-muted">Crie uma senha para acessar a organização que convidou você.</p>
+      <form id="invitation-form">
+        <div class="form-group">
+          <label class="form-label" for="invite-name">Nome completo</label>
+          <input id="invite-name" type="text" maxlength="120" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="invite-cpf">CPF</label>
+          <input id="invite-cpf" type="text" inputmode="numeric" maxlength="14" autocomplete="off" required placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="invite-birth-date">Data de nascimento</label>
+          <input id="invite-birth-date" type="date" autocomplete="bday" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="invite-phone">Celular</label>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span aria-label="Código internacional do Brasil">+55</span>
+            <input id="invite-phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="11" pattern="[0-9]{11}" required placeholder="DDD e 9 dígitos">
+          </div>
+          <small class="text-muted">Informe DDD e número (11 dígitos); o código 55 já está incluído.</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="invite-email">E-mail</label>
+          <input id="invite-email" type="email" maxlength="254" autocomplete="email" required>
+        </div>
+        <fieldset class="form-group">
+          <legend class="form-label">Endereço completo</legend>
+          <label class="form-label" for="invite-street">Logradouro</label>
+          <input id="invite-street" type="text" maxlength="160" autocomplete="address-line1" required>
+          <label class="form-label" for="invite-number">Número</label>
+          <input id="invite-number" type="text" maxlength="20" required>
+          <label class="form-label" for="invite-complement">Complemento (opcional)</label>
+          <input id="invite-complement" type="text" maxlength="100">
+          <label class="form-label" for="invite-neighborhood">Bairro</label>
+          <input id="invite-neighborhood" type="text" maxlength="100" autocomplete="address-level3" required>
+          <label class="form-label" for="invite-city">Município</label>
+          <input id="invite-city" type="text" maxlength="100" autocomplete="address-level2" required>
+          <label class="form-label" for="invite-state">UF</label>
+          <select id="invite-state" autocomplete="address-level1" required>
+            <option value="">Selecione</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+            <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+            <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+            <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+            <option>SE</option><option>TO</option>
+          </select>
+          <label class="form-label" for="invite-cep">CEP</label>
+          <input id="invite-cep" type="text" inputmode="numeric" maxlength="9" autocomplete="postal-code" required placeholder="00000-000">
+        </fieldset>
+        <div class="form-group">
+          <label class="form-label" for="invite-password">Senha</label>
+          <input id="invite-password" type="password" autocomplete="new-password" minlength="12" maxlength="72" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="invite-password-confirm">Confirme a senha</label>
+          <input id="invite-password-confirm" type="password" autocomplete="new-password" minlength="12" maxlength="72" required>
+        </div>
+        <p id="invite-message" role="status" aria-live="polite"></p>
+        <button type="submit" class="btn">Criar acesso</button>
+      </form>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/registration-form.js"></script>
+  <script src="js/accept-invitation.js"></script>
+</body>
+</html>

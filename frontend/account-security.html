@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16845B">
+  <title>Segurança da conta - 5585 Projects</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <main class="login-container">
+    <section class="login-card">
+      <h1>Segurança da conta</h1>
+      <p id="security-message" role="status" aria-live="polite"></p>
+
+      <form id="request-reset-form">
+        <h2>Redefinir senha</h2>
+        <p class="text-muted">Enviaremos um link se houver uma conta verificada para este e-mail.</p>
+        <label class="form-label" for="reset-email">E-mail</label>
+        <input id="reset-email" type="email" autocomplete="email" maxlength="254" required>
+        <button class="btn mt-4" type="submit">Enviar link de redefinição</button>
+      </form>
+
+      <form id="resend-verification-form" class="mt-4">
+        <h2>Confirmar e-mail</h2>
+        <label class="form-label" for="verify-email-address">E-mail</label>
+        <input id="verify-email-address" type="email" autocomplete="email" maxlength="254" required>
+        <button class="btn btn-outline mt-4" type="submit">Reenviar confirmação</button>
+      </form>
+
+      <form id="set-new-password-form" hidden>
+        <h2>Escolha uma nova senha</h2>
+        <label class="form-label" for="new-password">Nova senha</label>
+        <input id="new-password" type="password" autocomplete="new-password" minlength="12" maxlength="72" required>
+        <label class="form-label" for="confirm-new-password">Confirme a nova senha</label>
+        <input id="confirm-new-password" type="password" autocomplete="new-password" minlength="12" maxlength="72" required>
+        <button class="btn mt-4" type="submit">Atualizar senha</button>
+      </form>
+      <p><a href="/login">Voltar ao login</a></p>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/account-security.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Cria e define o diretório de trabalho dentro do container
 WORKDIR /usr/src/app
@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Instala apenas as dependências de produção
-RUN npm install --only=production
+RUN npm ci --omit=dev
 
 # Copia o restante do código do backend
 COPY . .

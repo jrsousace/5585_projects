@@ -3,1216 +3,289 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaaS Financeiro - Dashboard</title>
+  <meta name="theme-color" content="#101b2c">
+  <meta name="description" content="Acesse os sistemas de gestão da 5585 Projects em uma única prateleira.">
+  <title>Meus sistemas - 5585 Projects</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#16845B">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #101b2c;
+      --surface: #17263a;
+      --surface-raised: #1c2d43;
+      --border: rgba(180, 203, 228, 0.13);
+      --text: #f3f7fc;
+      --muted: #9eafc3;
+      --accent: #61d6c5;
+      --accent-dark: #133b3c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 85% 0%, rgba(54, 114, 139, 0.2), transparent 36rem),
+        var(--page);
+      color: var(--text);
+      font: 400 16px/1.6 "DM Sans", sans-serif;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .site-header { border-bottom: 1px solid var(--border); }
+    .header-content {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand {
+      color: var(--text);
+      font: 700 1.15rem/1 "Space Grotesk", sans-serif;
+      letter-spacing: -0.04em;
+      text-decoration: none;
+    }
+    .brand span { color: var(--accent); }
+    .account { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 0.9rem; }
+    .text-button {
+      padding: 8px 0;
+      border: 0;
+      background: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .text-button:hover, .text-button:focus-visible { color: var(--accent); }
+    main { padding: 64px 0 80px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 { font-family: "Space Grotesk", sans-serif; line-height: 1.2; }
+    h1 { max-width: 700px; margin: 0; font-size: clamp(2.2rem, 5vw, 3.65rem); letter-spacing: -0.055em; }
+    .intro { max-width: 680px; margin: 18px 0 0; color: var(--muted); font-size: 1.08rem; }
+    .section-heading { margin: 54px 0 20px; }
+    .section-heading h2 { margin: 0; font-size: 1.55rem; letter-spacing: -0.035em; }
+    .section-heading p { margin: 8px 0 0; color: var(--muted); }
+    .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .product-card {
+      min-height: 245px;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(155deg, rgba(28, 45, 67, 0.94), rgba(23, 38, 58, 0.96));
+    }
+    .product-card.enabled { border-color: rgba(97, 214, 197, 0.5); }
+    .product-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .product-icon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 1.45rem;
+    }
+    .status {
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.73rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .enabled .status { border-color: rgba(97, 214, 197, 0.3); background: var(--accent-dark); color: var(--accent); }
+    .product-card h3 { margin: 20px 0 8px; font-size: 1.2rem; }
+    .product-card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+    .product-action {
+      width: fit-content;
+      margin-top: auto;
+      padding-top: 20px;
+      color: var(--accent);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .product-action:hover, .product-action:focus-visible { text-decoration: underline; }
+    .product-action.disabled { color: #8797aa; cursor: default; text-decoration: none; }
+    .vertical-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .vertical-card {
+      width: 100%;
+      padding: 19px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: rgba(23, 38, 58, 0.68);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+    .vertical-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-dark); }
+    .vertical-card h3 { margin: 0 0 7px; font-size: 1rem; }
+    .vertical-card p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+    footer { padding: 24px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; }
+
+    @media (max-width: 760px) {
+      main { padding-top: 46px; }
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .vertical-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .container { width: min(100% - 28px, 1120px); }
+      .header-content { min-height: 68px; }
+      .account { gap: 10px; }
+      #account-name { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .product-grid { grid-template-columns: 1fr; }
+      .product-card { min-height: 215px; }
+    }
+  </style>
 </head>
 <body>
-  
-  <div class="app-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header" id="btn-logo-home" title="Voltar ao Dashboard">
-        <h2>FinanceApp</h2>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="/" aria-label="5585 Projects, início">5585 <span>PROJECTS</span></a>
+      <div class="account">
+        <span id="account-name" hidden></span>
+        <a class="text-button" id="admin-link" href="/admin" hidden>Gestão master</a>
+        <a class="text-button" id="login-link" href="/login">Entrar</a>
+        <button type="button" class="text-button" id="logout-button" hidden>Sair</button>
       </div>
-      <nav class="sidebar-nav" id="main-nav">
-        <!-- Navegação injetada dinamicamente pelo JS (Fase 3) -->
-      </nav>
-      <div class="sidebar-footer">
-        <div class="nav-accordion">
-          <button class="nav-accordion-btn" id="btn-config">⚙️ Configurações <span class="arrow">▼</span></button>
-          <div class="nav-submenu">
-            <a href="#/config/perfil" class="nav-item nav-sub-item" data-link>Perfil do Titular</a>
-            <a href="#/config/dependentes" class="nav-item nav-sub-item" data-link>Dependentes / Subcontas</a>
-            <a href="#/config/bancos" class="nav-item nav-sub-item" data-link>Bancos (Febraban)</a>
-            <a href="#/config/assinatura" class="nav-item nav-sub-item" data-link>Assinatura e Faturamento</a>
-          </div>
-        </div>
-        <button id="btn-logout" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Sair</button>
-      </div>
-    </aside>
+    </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <header class="topbar">
-        <button id="btn-menu-toggle" class="menu-toggle">☰</button>
-        
-        <!-- Nova seção de ferramentas no topbar -->
-        <div class="topbar-actions">
-          <button id="btn-theme-toggle" class="theme-toggle" title="Alternar Tema">
-            <span class="icon-moon">🌙</span>
-            <span class="icon-sun" style="display: none;">☀️</span>
-          </button>
-          <div class="user-info">
-            <span id="user-name">Carregando...</span>
-          </div>
-        </div>
-      </header>
+  <main class="container">
+    <section aria-labelledby="welcome-title">
+      <p class="eyebrow">Seu espaço de trabalho</p>
+      <h1 id="welcome-title">Seus sistemas, em um só lugar.</h1>
+      <p class="intro">Acesse as plataformas disponíveis para sua conta e conheça soluções de gestão criadas para diferentes operações.</p>
+    </section>
 
-      <!-- Container raiz onde os templates serão renderizados (Fase 2) -->
-      <div id="app" class="content-area"></div>
-    </main>
-  </div>
+    <section aria-labelledby="systems-title">
+      <div class="section-heading">
+        <h2 id="systems-title">Prateleira de sistemas</h2>
+        <p>Faça seu cadastro gratuito para usar os módulos. No plano gratuito, os dados ficam salvos neste navegador; uma assinatura vigente habilita o armazenamento na nuvem e os relatórios incluídos.</p>
+      </div>
+      <div class="product-grid">
+        <article class="product-card enabled" data-business-types="clinicas,docerias,hotelaria,oficinas">
+          <div class="product-top"><span class="product-icon" aria-hidden="true">💹</span><span class="status" id="finance-status">Cadastro gratuito</span></div>
+          <h3>Financeiro</h3>
+          <p>Organize transações, orçamento, metas e investimentos da sua vida financeira.</p>
+          <a class="product-action" id="finance-link" href="/login">Entre para acessar o Financeiro <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="product-card" data-business-types="clinicas,docerias,hotelaria,oficinas">
+          <div class="product-top"><span class="product-icon" aria-hidden="true">📦</span><span class="status">Em breve</span></div>
+          <h3>Estoque</h3>
+          <p>Produtos, movimentações e inventário para acompanhar sua operação.</p>
+          <span class="product-action disabled">Disponibilidade em breve</span>
+        </article>
+        <article class="product-card" data-business-types="clinicas,docerias,hotelaria,oficinas">
+          <div class="product-top"><span class="product-icon" aria-hidden="true">🤝</span><span class="status">Em breve</span></div>
+          <h3>CRM</h3>
+          <p>Relacionamento com clientes, oportunidades e acompanhamento comercial.</p>
+          <span class="product-action disabled">Disponibilidade em breve</span>
+        </article>
+        <article class="product-card" data-business-types="docerias,hotelaria">
+          <div class="product-top"><span class="product-icon" aria-hidden="true">🚚</span><span class="status">Em breve</span></div>
+          <h3>Logística</h3>
+          <p>Fluxos, entregas e rotinas logísticas em uma visão integrada.</p>
+          <span class="product-action disabled">Disponibilidade em breve</span>
+        </article>
+        <article class="product-card" data-business-types="hotelaria,oficinas">
+          <div class="product-top"><span class="product-icon" aria-hidden="true">🛠️</span><span class="status">Em breve</span></div>
+          <h3>Manutenção</h3>
+          <p>Equipamentos, ordens de serviço e planos de manutenção.</p>
+          <span class="product-action disabled">Disponibilidade em breve</span>
+        </article>
+        <article class="product-card" data-business-types="clinicas,hotelaria">
+          <div class="product-top"><span class="product-icon" aria-hidden="true">✅</span><span class="status">Em breve</span></div>
+          <h3>Check-in</h3>
+          <p>Controle de entradas, reservas e atendimento em diferentes operações.</p>
+          <span class="product-action disabled">Disponibilidade em breve</span>
+        </article>
+      </div>
+    </section>
 
-  <!-- Fase 4 e Fase 3: Templates HTML escondidos -->
-  
-  <!-- Template: Dashboard (Home) -->
-  <template id="tpl-dashboard">
-    <div class="view-header">
-      <h1>Dashboard</h1>
-      <p>Bem-vindo ao seu painel financeiro.</p>
-    </div>
-    <div class="dashboard-cards">
-      <div class="card card-featured">
-        <h3>Saldo Atual</h3>
-        <p class="h2">R$ <span id="dash-saldo">0,00</span></p>
+    <section aria-labelledby="verticals-title">
+      <div class="section-heading">
+        <h2 id="verticals-title">Gestão sob medida para cada negócio</h2>
+        <p>Selecione um segmento para filtrar os sistemas relacionados.</p>
       </div>
-      <div class="card">
-        <h3 class="text-muted">Despesas (Mês)</h3>
-        <p class="h2" style="color: var(--error-color);">R$ <span id="dash-despesas">0,00</span></p>
+      <div class="vertical-grid">
+        <button type="button" class="vertical-card" data-business-type="clinicas" aria-pressed="false"><h3>Clínicas</h3><p>Rotinas de atendimento e gestão da operação.</p></button>
+        <button type="button" class="vertical-card" data-business-type="docerias" aria-pressed="false"><h3>Docerias</h3><p>Vendas, estoque e produção em um só fluxo.</p></button>
+        <button type="button" class="vertical-card" data-business-type="hotelaria" aria-pressed="false"><h3>Hotelaria</h3><p>Reservas, check-in e gestão de serviços.</p></button>
+        <button type="button" class="vertical-card" data-business-type="oficinas" aria-pressed="false"><h3>Oficinas</h3><p>Ordens de serviço, peças e manutenção.</p></button>
       </div>
-    </div>
-    
-    <div class="card mt-4">
-      <h3>Resumo de Despesas</h3>
-      <div class="chart-container" style="position: relative; height:300px; width:100%">
-        <canvas id="expensesChart"></canvas>
-      </div>
-    </div>
-  </template>
+    </section>
+  </main>
 
-  <!-- Template: Orçamento Doméstico -->
-  <template id="tpl-orcamento">
-    <div class="view-header">
-      <h1>Transações</h1>
-      <button class="btn" data-action="nova-transacao">Nova Transação</button>
-    </div>
-    
-    <div class="card mt-4">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Descrição</th>
-              <th>Categoria</th>
-              <th>Forma PG</th>
-              <th>Valor</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-transacoes">
-            <!-- Renderizado via JS DocumentFragment -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
+  <footer>
+    <div class="container">5585 Projects · Plataformas de gestão empresarial em nuvem.</div>
+  </footer>
 
-  <!-- Template: Orçamentos / Metas -->
-  <template id="tpl-metas">
-    <div class="view-header">
-      <div>
-        <h1>Orçamentos e Metas</h1>
-        <p class="text-muted">Planeje seus limites mensais e acompanhe seus grandes objetivos.</p>
-      </div>
-    </div>
-    
-    <div class="tabs-container" style="border-bottom: 1px solid var(--border-color); margin-bottom: var(--spacing-lg); display: flex; gap: 1rem; overflow-x: auto;">
-      <button class="btn-tab active" data-target="tab-orc-mensal" style="background: none; border: none; border-bottom: 2px solid var(--primary-color); padding: 0.5rem 1rem; color: var(--text-color); font-weight: 600; cursor: pointer; white-space: nowrap;">Orçamento Mensal</button>
-      <button class="btn-tab" data-target="tab-metas-longo" style="background: none; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 1rem; color: var(--text-muted); font-weight: 500; cursor: pointer; white-space: nowrap;">Metas de Longo Prazo</button>
-    </div>
+  <script src="js/session.js"></script>
+  <script>
+    const accountName = document.getElementById('account-name');
+    const loginLink = document.getElementById('login-link');
+    const logoutButton = document.getElementById('logout-button');
+    const adminLink = document.getElementById('admin-link');
+    const financeLink = document.getElementById('finance-link');
+    const financeStatus = document.getElementById('finance-status');
+    const businessTypeButtons = document.querySelectorAll('[data-business-type]');
+    const productCards = document.querySelectorAll('.product-card[data-business-types]');
 
-    <!-- TAB: Orçamento Mensal -->
-    <div id="tab-orc-mensal" class="tab-pane">
-      <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
-        <div class="card card-featured">
-          <h3>Planejado vs Realizado</h3>
-          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: var(--spacing-sm);">
-            <div>
-              <p class="text-muted text-meta" style="color: rgba(255,255,255,0.7) !important;">Gasto Atual</p>
-              <p class="h2">R$ <span id="orc-gasto">0,00</span></p>
-            </div>
-            <div style="text-align: right;">
-              <p class="text-muted text-meta" style="color: rgba(255,255,255,0.7) !important;">Teto Mensal</p>
-              <p class="h3" style="color: white; font-weight: normal;">R$ <span id="orc-teto">0,00</span></p>
-            </div>
-          </div>
-          <div style="width: 100%; background-color: rgba(255,255,255,0.2); height: 8px; border-radius: 4px; margin-top: 1rem; overflow: hidden;">
-            <div id="orc-progress-bar" style="width: 0%; height: 100%; background-color: var(--success-color); transition: width 0.5s ease, background-color 0.5s;"></div>
-          </div>
-        </div>
-      </div>
+    businessTypeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const selectedType = button.getAttribute('data-business-type');
+        const isSelected = button.getAttribute('aria-pressed') === 'true';
+        businessTypeButtons.forEach((item) => item.setAttribute('aria-pressed', 'false'));
+        if (isSelected) {
+          productCards.forEach((card) => { card.hidden = false; });
+          return;
+        }
 
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3>Acompanhamento Diário (Fluxo de Caixa)</h3>
-          <select class="form-group" style="width: auto; margin: 0; padding: 0.25rem;" id="orc-mes-selector">
-            <!-- Popula com os meses -->
-          </select>
-        </div>
-        <p class="text-muted text-meta mb-4">Clique nos dias para expandir e ver o detalhamento do caixa.</p>
-        
-        <div id="orc-calendario-accordion">
-          <!-- Renderizado via JS -->
-        </div>
-      </div>
-    </div>
+        button.setAttribute('aria-pressed', 'true');
+        productCards.forEach((card) => {
+          const types = card.getAttribute('data-business-types').split(',');
+          card.hidden = !types.includes(selectedType);
+        });
+      });
+    });
 
-    <!-- TAB: Metas de Longo Prazo -->
-    <div id="tab-metas-longo" class="tab-pane" style="display: none;">
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-        <button class="btn btn-outline" data-action="nova-meta">+ Nova Meta</button>
-      </div>
-      
-      <div id="lista-metas-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
-        <!-- Renderizado via JS -->
-      </div>
-    </div>
-  </template>
+    function renderSession() {
+      const session = getActiveSession();
+      accountName.hidden = !session;
+      logoutButton.hidden = !session;
+      loginLink.hidden = Boolean(session);
+      adminLink.hidden = session?.user?.accessRole !== 'master';
 
-  <!-- Template: Faturas (Cartões e Diversas) -->
-  <template id="tpl-faturas">
-    <div class="view-header">
-      <div>
-        <h1>Faturas e Extratos</h1>
-        <p class="text-muted">Gestão automatizada e revisão de faturas de cartões.</p>
-      </div>
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="btn btn-outline" data-action="conectar-open-finance" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 160px;">
-          <span>🔗</span> Open Finance
-        </button>
-        <button class="btn" data-action="importar-fatura" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 160px;">
-          <span>📄</span> Leitura OCR (IA)
-        </button>
-      </div>
-    </div>
-    
-    <div class="card mt-4">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Vencimento</th>
-              <th>Cartão / Referência</th>
-              <th>Valor Total</th>
-              <th>Status</th>
-              <th style="width: 120px; text-align: center;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-faturas">
-            <!-- Renderizado via JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
+      if (session) {
+        accountName.textContent = session.user.name || session.user.email || 'Minha conta';
+        financeLink.href = 'financas';
+        financeLink.innerHTML = 'Abrir Financeiro <span aria-hidden="true">→</span>';
+        financeStatus.textContent = 'Disponível para sua conta';
+      } else {
+        accountName.textContent = '';
+        financeLink.href = '/login';
+        financeLink.innerHTML = 'Entre para acessar o Financeiro <span aria-hidden="true">→</span>';
+        financeStatus.textContent = 'Cadastro gratuito';
+      }
+    }
 
-  <!-- Template: Relatórios (Estrutura Genérica que atende as 4 visões) -->
-  <template id="tpl-relatorios">
-    <div class="view-header">
-      <div>
-        <h1 id="rel-title">Relatório</h1>
-        <p class="text-muted" id="rel-desc">Análise detalhada do período.</p>
-      </div>
-      <button class="btn btn-outline" style="display: flex; gap: 0.5rem; align-items: center;">
-        <span>📥</span> Exportar PDF/CSV
-      </button>
-    </div>
+    logoutButton.addEventListener('click', () => {
+      clearStoredSession();
+      renderSession();
+    });
 
-    <!-- Barra de Filtros -->
-    <div class="card mb-4" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--surface-color);">
-      <span class="text-muted" style="font-weight: 500;">Período:</span>
-      <select id="rel-filtro-periodo" class="form-group" style="margin: 0; width: auto; padding: 0.25rem 0.5rem; min-height: auto;">
-        <option value="30">Últimos 30 dias</option>
-        <option value="ytd">Neste Ano (YTD)</option>
-        <option value="12m" selected>Últimos 12 meses</option>
-        <option value="all">Todo o Histórico</option>
-      </select>
-      <button class="btn btn-outline" style="padding: 0.25rem 1rem; min-height: auto;" onclick="initRelatorioView(window.location.hash.replace('#', ''))">Atualizar</button>
-    </div>
-
-    <!-- Área Gráfica -->
-    <div class="card mb-4">
-      <div style="position: relative; height: 350px; width: 100%;">
-        <canvas id="relatorioChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Área Tabular -->
-    <div class="card">
-      <h3 class="mb-4">Detalhamento Numérico</h3>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead id="rel-table-head">
-            <!-- Injetado via JS -->
-          </thead>
-          <tbody id="rel-table-body">
-            <!-- Injetado via JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Ferramentas -> Juros Compostos -->
-  <template id="tpl-tools-juros">
-    <div class="view-header">
-      <div>
-        <h1>Simulador de Juros Compostos</h1>
-        <p class="text-muted">Projete o crescimento do seu dinheiro ao longo do tempo.</p>
-      </div>
-    </div>
-    <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
-      <div class="card" style="flex: 1; min-width: 300px;">
-        <form id="form-juros">
-          <div class="form-group">
-            <label class="form-label">Valor Inicial (R$)</label>
-            <input type="number" id="j-inicial" value="1000" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Aporte Mensal (R$)</label>
-            <input type="number" id="j-mensal" value="500" step="0.01" required>
-          </div>
-          <div style="display: flex; gap: 1rem;">
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label">Taxa Anual (%)</label>
-              <input type="number" id="j-taxa" value="10" step="0.01" required>
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label">Período (Anos)</label>
-              <input type="number" id="j-anos" value="10" required>
-            </div>
-          </div>
-          <button type="submit" class="btn mt-2">Calcular</button>
-        </form>
-      </div>
-      <div class="card" style="flex: 2; min-width: 300px;">
-        <h3 class="mb-4">Resultado Total: <span id="j-resultado-total" style="color: var(--success-color);">R$ 0,00</span></h3>
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-          <div style="flex: 1;"><p class="text-muted text-meta">Total Investido</p><p id="j-resultado-investido">R$ 0,00</p></div>
-          <div style="flex: 1;"><p class="text-muted text-meta">Total em Juros</p><p id="j-resultado-juros" style="color: var(--success-color);">R$ 0,00</p></div>
-        </div>
-        <div style="position: relative; height: 250px; width: 100%;">
-          <canvas id="jurosChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Ferramentas -> Independência Financeira -->
-  <template id="tpl-tools-independencia">
-    <div class="view-header">
-      <div>
-        <h1>Independência Financeira (FIRE)</h1>
-        <p class="text-muted">Descubra quando você poderá viver de renda (Regra dos 4%).</p>
-      </div>
-    </div>
-    <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
-      <div class="card" style="flex: 1; min-width: 300px;">
-        <form id="form-fire">
-          <div class="form-group">
-            <label class="form-label">Custo de Vida Mensal Desejado (R$)</label>
-            <input type="number" id="f-custo" value="5000" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Patrimônio Atual Investido (R$)</label>
-            <input type="number" id="f-atual" value="50000" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Aporte Mensal (R$)</label>
-            <input type="number" id="f-aporte" value="1500" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Rentabilidade Real Anual (% acima da inflação)</label>
-            <input type="number" id="f-rent" value="6" step="0.01" required>
-          </div>
-          <button type="submit" class="btn mt-2">Calcular Rota</button>
-        </form>
-      </div>
-      <div class="card" style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        <h3 class="text-muted mb-4">Você alcançará a Independência em:</h3>
-        <p class="h2" style="font-size: 4rem; color: var(--primary-color);" id="f-anos-resultado">-- anos</p>
-        <p class="h3 mt-4 text-muted">Patrimônio Alvo Necessário</p>
-        <p class="h2" style="color: var(--success-color);" id="f-alvo-resultado">R$ 0,00</p>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Ferramentas -> Amortização -->
-  <template id="tpl-tools-amortizacao">
-    <div class="view-header">
-      <div>
-        <h1>Calculadora de Amortização</h1>
-        <p class="text-muted">Simule financiamentos e veja o impacto financeiro.</p>
-      </div>
-    </div>
-    <div class="card mb-4">
-      <form id="form-amort" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-        <div class="form-group" style="flex: 1; min-width: 150px; margin: 0;">
-          <label class="form-label">Valor Financiado</label>
-          <input type="number" id="am-valor" value="300000" step="0.01" required>
-        </div>
-        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
-          <label class="form-label">Taxa Anual (%)</label>
-          <input type="number" id="am-taxa" value="9.5" step="0.01" required>
-        </div>
-        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
-          <label class="form-label">Meses</label>
-          <input type="number" id="am-meses" value="360" required>
-        </div>
-        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
-          <label class="form-label">Sistema</label>
-          <select id="am-sistema">
-            <option value="SAC">SAC</option>
-            <option value="PRICE">PRICE</option>
-          </select>
-        </div>
-        <button type="submit" class="btn" style="flex: 1; min-width: 150px;">Simular</button>
-      </form>
-    </div>
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap;">
-        <h3 class="text-muted">Total Pago: <span id="am-total" style="color: var(--text-color);">R$ 0,00</span></h3>
-        <h3 class="text-muted">Total Juros: <span id="am-juros" style="color: var(--error-color);">R$ 0,00</span></h3>
-      </div>
-      <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-        <table class="data-table">
-          <thead>
-            <tr><th>Mês</th><th>Parcela</th><th>Amortização</th><th>Juros</th><th>Saldo Devedor</th></tr>
-          </thead>
-          <tbody id="lista-amort"></tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: IRPF -> Resumo Anual -->
-  <template id="tpl-irpf-resumo">
-    <div class="view-header">
-      <div>
-        <h1>Resumo Anual para Declaração (IRPF)</h1>
-        <p class="text-muted">Valores consolidados por ano-calendário prontos para o Carnê-Leão e IRPF anual.</p>
-      </div>
-      <select id="irpf-ano" class="form-group" style="width: 120px; margin: 0; padding: 0.25rem 0.5rem;">
-        <option value="2026">2026</option>
-        <option value="2025">2025</option>
-      </select>
-    </div>
-
-    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
-      <div class="card" style="border-left: 4px solid var(--success-color);">
-        <h3>Rendimentos Tributáveis</h3>
-        <p class="h2">R$ 145.500,00</p>
-        <p class="text-muted text-meta mt-2">Salários, Pró-Labore, Aluguéis recebidos</p>
-      </div>
-      <div class="card" style="border-left: 4px solid var(--info-color);">
-        <h3>Rendimentos Isentos</h3>
-        <p class="h2">R$ 22.340,00</p>
-        <p class="text-muted text-meta mt-2">Dividendos, Vendas de Ações &lt; 20k, LCI/LCA</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 class="mb-4">Despesas Dedutíveis (Pagamentos Efetuados)</h3>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead><tr><th>Código/Grupo</th><th>Descrição / Beneficiário</th><th>Valor Total Declarado</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><strong>26 - Plano de Saúde</strong></td>
-              <td>Amil Assistência Médica (CNPJ: 00.000.000/0001-00)</td>
-              <td style="color: var(--error-color);">R$ 14.200,00</td>
-            </tr>
-            <tr>
-              <td><strong>01 - Educação (Titular)</strong></td>
-              <td>Universidade X (CNPJ: 11.111.111/0001-11)</td>
-              <td style="color: var(--error-color);">R$ 8.500,00</td>
-            </tr>
-            <tr>
-              <td><strong>21 - Médicos, Dentistas</strong></td>
-              <td>Dr. João Silva (CPF: 123.456.789-00)</td>
-              <td style="color: var(--error-color);">R$ 1.200,00</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: IRPF -> Apuração de Ações -->
-  <template id="tpl-irpf-apuracao">
-    <div class="view-header">
-      <div>
-        <h1>Apuração de Ações e FIIs (DARF)</h1>
-        <p class="text-muted">Apuração mensal de lucros e prejuízos com Renda Variável.</p>
-      </div>
-      <button class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;"><span>📄</span> Gerar DARF PDF</button>
-    </div>
-
-    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
-      <div class="card card-featured">
-        <h3>Imposto a Pagar (Mês Atual)</h3>
-        <p class="h2">R$ 152,40</p>
-      </div>
-      <div class="card">
-        <h3 class="text-muted">Prejuízo Acumulado (A Compensar)</h3>
-        <p class="h2" style="color: var(--error-color);">R$ 450,00</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Mês</th>
-              <th>Operação</th>
-              <th>Volume Vendas</th>
-              <th>Lucro/Prejuízo</th>
-              <th>Imposto Devido</th>
-              <th>Status DARF</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Out/2026</td>
-              <td>Mercado à Vista (Ações)</td>
-              <td>R$ 25.000,00</td>
-              <td style="color: var(--success-color);">+ R$ 1.500,00</td>
-              <td style="color: var(--error-color);">R$ 225,00</td>
-              <td><span style="color: var(--warning-color);">Pendente</span></td>
-            </tr>
-            <tr>
-              <td>Set/2026</td>
-              <td>Fundos Imobiliários</td>
-              <td>R$ 5.000,00</td>
-              <td style="color: var(--success-color);">+ R$ 762,00</td>
-              <td style="color: var(--error-color);">R$ 152,40</td>
-              <td><span style="color: var(--success-color);">Pago</span></td>
-            </tr>
-            <tr>
-              <td>Ago/2026</td>
-              <td>Mercado à Vista (Ações)</td>
-              <td>R$ 12.000,00</td>
-              <td style="color: var(--success-color);">+ R$ 3.000,00</td>
-              <td class="text-muted">Isento (&lt; 20k)</td>
-              <td>-</td>
-            </tr>
-            <tr>
-              <td>Jul/2026</td>
-              <td>Day Trade (Mini Índice)</td>
-              <td>-</td>
-              <td style="color: var(--error-color);">- R$ 450,00</td>
-              <td class="text-muted">R$ 0,00</td>
-              <td>Prejuízo Registrado</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Cadastros -> Bancos (Apenas Leitura) -->
-  <template id="tpl-cadastros-bancos">
-    <div class="view-header">
-      <h1>Bancos</h1>
-      <p class="text-muted">Instituições financeiras em funcionamento no país (BACEN / BrasilAPI)</p>
-    </div>
-    <div class="card mt-4">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th style="width: 100px;">COMPE</th>
-              <th style="width: 120px;">ISPB (Pix)</th>
-              <th>Nome Reduzido</th>
-              <th>Nome Completo</th>
-            </tr>
-          </thead>
-          <tbody id="lista-bancos">
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Cadastros -> Contas -->
-  <template id="tpl-cadastros-contas">
-    <div class="view-header">
-      <h1>Contas e Cartões</h1>
-      <button class="btn" data-action="nova-conta">Nova Conta</button>
-    </div>
-    <div class="card mt-4">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Nome da Conta</th>
-              <th>Banco</th>
-              <th>Ag/CC</th>
-              <th style="width: 100px; text-align: center;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-contas">
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Cadastros -> Grupos e Categorias -->
-  <template id="tpl-cadastros-categorias">
-    <div class="view-header">
-      <h1>Grupos e Categorias</h1>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
-      <!-- Grupos -->
-      <div class="card mt-4">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3>Grupos</h3>
-          <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" data-action="novo-grupo">+ Grupo</button>
-        </div>
-        <table class="data-table">
-          <tbody id="lista-grupos"></tbody>
-        </table>
-      </div>
-      <!-- Categorias -->
-      <div class="card mt-4">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3>Categorias</h3>
-          <button class="btn btn-outline" style="padding: 0.25rem 0.5rem;" data-action="nova-categoria">+ Categoria</button>
-        </div>
-        <table class="data-table">
-          <tbody id="lista-categorias"></tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Cadastros -> Listagem Simples (Centros, Formas PG, Investimentos) -->
-  <template id="tpl-cadastros-simples">
-    <div class="view-header">
-      <h1 id="view-title-simples">Cadastros</h1>
-      <p id="view-desc-simples" class="text-muted" style="display: none;"></p>
-      <button class="btn" id="btn-novo-simples">Novo</button>
-    </div>
-    <div class="card mt-4">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th id="table-header-simples">Nome</th>
-              <th style="width: 100px; text-align: center;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-simples">
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Modal Global (Injetado via JS quando necessário) -->
-  <div id="modal-backdrop" class="modal-backdrop" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2 id="modal-title">Nova Transação</h2>
-        <button class="btn-close" id="btn-close-modal">×</button>
-      </div>
-      <div class="modal-body" id="modal-body-content">
-        <!-- O formulário será injetado aqui -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Formulário de Transação (Escondido) -->
-  <template id="tpl-form-transacao">
-    <form id="form-transacao">
-      <div class="form-group">
-        <label class="form-label">Tipo</label>
-        <select id="t-tipo" required>
-          <option value="despesa">Despesa</option>
-          <option value="receita">Receita</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select id="t-status" required>
-          <option value="pago">Pago</option>
-          <option value="pendente">Pendente</option>
-          <option value="atrasado">Atrasado</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Descrição</label>
-        <input type="text" id="t-descricao" required placeholder="Ex: Supermercado">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Valor Total (R$)</label>
-        <input type="number" id="t-valor" step="0.01" required placeholder="0.00">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Data de Vencimento</label>
-        <input type="date" id="t-data-venc" required>
-      </div>
-      <div class="form-group">
-        <label class="form-label text-muted">Data de Pagamento (Opcional)</label>
-        <input type="date" id="t-data-pag">
-      </div>
-      <div class="form-group">
-        <label class="form-label text-muted">Observação</label>
-        <textarea id="t-obs" placeholder="Detalhes opcionais..." rows="2"></textarea>
-      </div>
-      <button type="submit" class="btn">Salvar Transação</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Confirmar Pagamento -->
-  <template id="tpl-form-pagar-transacao">
-    <form id="form-pagar">
-      <p class="text-muted mb-4">Confirme os dados para dar baixa nesta transação.</p>
-      <div class="form-group">
-        <label class="form-label">Valor Efetivamente Pago (R$)</label>
-        <input type="number" id="p-valor" step="0.01" required>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Data do Pagamento</label>
-        <input type="date" id="p-data" required>
-      </div>
-      <input type="hidden" id="p-id">
-      <button type="submit" class="btn mt-4">Confirmar Pagamento</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Categoria (Escondido) -->
-  <template id="tpl-form-categoria">
-    <form id="form-categoria">
-      <div class="form-group">
-        <label class="form-label">Nome da Categoria</label>
-        <input type="text" id="cat-nome" required placeholder="Ex: Educação Infantil">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Pertence ao Grupo</label>
-        <select id="cat-grupo" required></select>
-      </div>
-      <button type="submit" class="btn">Salvar Categoria</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Grupo -->
-  <template id="tpl-form-grupo">
-    <form id="form-grupo">
-      <div class="form-group">
-        <label class="form-label">Nome do Grupo</label>
-        <input type="text" id="g-nome" required placeholder="Ex: Despesas Fixas">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Centro de Custo</label>
-        <select id="g-cc" required></select>
-      </div>
-      <button type="submit" class="btn">Salvar Grupo</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Entidade Simples (Reutilizável) -->
-  <template id="tpl-form-simples">
-    <form id="form-simples">
-      <div class="form-group">
-        <label class="form-label" id="label-nome-simples">Nome</label>
-        <input type="text" id="input-nome-simples" required>
-        <input type="hidden" id="input-tipo-simples">
-      </div>
-      <button type="submit" class="btn">Salvar</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Conta -->
-  <template id="tpl-form-conta">
-    <form id="form-conta">
-      <div class="form-group">
-        <label class="form-label">Nome da Conta / Cartão / Carteira</label>
-        <input type="text" id="c-nome" required placeholder="Ex: Conta Corrente Itaú ou Carteira Física">
-      </div>
-      
-      <div class="form-group" style="position: relative;">
-        <label class="form-label text-muted">Instituição Financeira (Opcional)</label>
-        <div style="display: flex; gap: 0.5rem;">
-          <input type="text" id="c-banco-nome" placeholder="Ex: Nubank (Deixe em branco se for Dinheiro Físico)" style="flex: 1;">
-          <input type="hidden" id="c-banco-codigo">
-          <button type="button" class="btn btn-outline" id="btn-buscar-banco" style="min-height: auto; padding: 0 1rem;" title="Buscar Instituição Oficial">🔍</button>
-        </div>
-        
-        <!-- Dropdown de Busca de Bancos (Escondido) -->
-        <div id="bancos-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; z-index: 100;">
-          <ul id="bancos-list" style="list-style: none; margin: 0; padding: 0;">
-            <!-- Injetado via JS -->
-          </ul>
-        </div>
-      </div>
-      
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label text-muted">Agência</label>
-          <input type="text" id="c-agencia">
-        </div>
-        <div class="form-group" style="flex: 2;">
-          <label class="form-label text-muted">Conta</label>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="c-num" style="flex: 3;">
-            <span style="display: flex; align-items: center; color: var(--text-muted);">-</span>
-            <input type="text" id="c-digito" style="flex: 1;" placeholder="Díg.">
-          </div>
-        </div>
-      </div>
-      <button type="submit" class="btn">Salvar Conta</button>
-    </form>
-  </template>
-
-  <!-- Formulário de Importação de Fatura (Upload/OCR) -->
-  <template id="tpl-form-import">
-    <form id="form-import">
-      <div class="form-group text-center mb-4">
-        <p class="text-muted text-meta">Nossa IA (Gemini Vision) fará a leitura óptica (OCR) do seu documento e extrairá todos os lançamentos para você revisar.</p>
-      </div>
-      
-      <div class="form-group mb-4">
-        <label class="form-label">Tipo de Documento</label>
-        <select id="f-tipo-doc" required>
-          <option value="cartao">Fatura de Cartão de Crédito</option>
-          <option value="consumo">Conta de Consumo (Água, Luz, Internet)</option>
-          <option value="nota_fiscal">Nota Fiscal (Supermercado, Lojas)</option>
-          <option value="extrato">Extrato Bancário (PDF/OFX)</option>
-          <option value="contracheque">Contracheque / Holerite (Salário)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <div class="upload-zone" id="upload-zone">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📄</div>
-          <span id="upload-text" style="font-weight: 500;">Clique ou arraste o arquivo aqui</span>
-          <p class="text-meta text-muted mt-4">Aceita PDF, PNG e JPG</p>
-          <input type="file" id="f-arquivo" accept=".pdf,image/png,image/jpeg" style="display:none;">
-        </div>
-      </div>
-      <button type="submit" class="btn">Processar com Inteligência Artificial</button>
-    </form>
-  </template>
-
-  <!-- Modal de Open Finance (Mock Connect) -->
-  <template id="tpl-open-finance">
-    <div class="text-center" style="padding: var(--spacing-lg) 0;">
-      <div style="font-size: 3rem; margin-bottom: var(--spacing-md);">🏦</div>
-      <h3 style="margin-bottom: var(--spacing-sm);">Sincronização Bancária</h3>
-      <p class="text-muted mb-4" style="font-size: var(--text-body);">Conecte-se com segurança utilizando as APIs oficiais do Open Finance Brasil. Extratos e faturas de cartão cairão direto no sistema.</p>
-      <div class="form-group" style="text-align: left; margin-bottom: var(--spacing-lg);">
-        <label class="form-label">Selecione o seu Banco</label>
-        <select id="of-banco" required>
-          <option value="ita">Itaú Unibanco</option>
-          <option value="nu">Nubank</option>
-          <option value="c6">C6 Bank</option>
-          <option value="bra">Bradesco</option>
-          <option value="bb">Banco do Brasil</option>
-        </select>
-      </div>
-      <button type="button" class="btn" id="btn-conectar-of" style="width: 100%;">Conectar com o Banco</button>
-      <p class="text-meta text-muted mt-4" style="font-size: 0.75rem;">Protegido por criptografia de ponta a ponta (Bacen).</p>
-    </div>
-  </template>
-
-  <!-- Template: Revisão Pós OCR / Open Finance -->
-  <template id="tpl-revisao-fatura">
-    <div>
-      <div style="background: rgba(22, 132, 91, 0.1); border-left: 4px solid var(--primary-color); padding: var(--spacing-sm) var(--spacing-md); margin-bottom: var(--spacing-lg);">
-        <strong>Sucesso!</strong> Foram encontrados <strong><span id="ocr-count">0</span> lançamentos</strong>. Revise-os antes de gravar no seu Orçamento.
-      </div>
-      <div style="max-height: 350px; overflow-y: auto; margin-bottom: var(--spacing-lg); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-        <table class="data-table" style="font-size: var(--text-meta);">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Descrição Extraída</th>
-              <th>Valor (R$)</th>
-            </tr>
-          </thead>
-          <tbody id="lista-revisao-ocr">
-            <!-- Itens extraídos -->
-          </tbody>
-        </table>
-      </div>
-      <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
-        <span class="h3" style="margin:0;">Total: R$ <span id="ocr-total" style="color: var(--error-color);">0,00</span></span>
-        <button type="button" class="btn" id="btn-confirmar-fatura">Salvar no Orçamento</button>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Assinaturas e Recorrências -->
-  <template id="tpl-assinaturas">
-    <div class="view-header">
-      <div>
-        <h1>Assinaturas e Recorrências</h1>
-        <p class="text-muted">Acompanhe seus contratos mensais e serviços digitais (Streaming, SaaS, etc).</p>
-      </div>
-      <button class="btn" data-action="nova-assinatura">+ Adicionar Assinatura</button>
-    </div>
-    
-    <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
-      <div class="card card-featured">
-        <h3>Comprometimento Mensal</h3>
-        <p class="h2">R$ <span id="ass-total">0,00</span></p>
-      </div>
-      <div class="card">
-        <h3 class="text-muted">Próxima Renovação</h3>
-        <p class="h2" style="color: var(--warning-color);" id="ass-prox">---</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Serviço / Contrato</th>
-              <th>Categoria</th>
-              <th>Próxima Cobrança</th>
-              <th>Valor (R$)</th>
-              <th>Status</th>
-              <th style="width: 80px; text-align: center;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-assinaturas">
-            <!-- Renderizado via JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Investimentos -->
-  <template id="tpl-investimentos">
-    <div class="view-header">
-      <div>
-        <h1>Carteira de Investimentos</h1>
-        <p class="text-muted">Acompanhe a evolução do seu patrimônio e rentabilidade.</p>
-      </div>
-      <button class="btn" data-action="novo-investimento">+ Novo Aporte</button>
-    </div>
-    
-    <div class="tabs-container" style="border-bottom: 1px solid var(--border-color); margin-bottom: var(--spacing-lg); display: flex; gap: 1rem; overflow-x: auto;">
-      <button class="btn-tab active" data-target="tab-carteira" style="background: none; border: none; border-bottom: 2px solid var(--primary-color); padding: 0.5rem 1rem; color: var(--text-color); font-weight: 600; cursor: pointer; white-space: nowrap;">Minha Carteira</button>
-      <button class="btn-tab" data-target="tab-desempenho" style="background: none; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 1rem; color: var(--text-muted); font-weight: 500; cursor: pointer; white-space: nowrap;">Desempenho & Cotações</button>
-      <button class="btn-tab" data-target="tab-matriz" style="background: none; border: none; border-bottom: 2px solid transparent; padding: 0.5rem 1rem; color: var(--text-muted); font-weight: 500; cursor: pointer; white-space: nowrap;">Matrizes de Análise</button>
-    </div>
-
-    <!-- TAB: Carteira -->
-    <div id="tab-carteira" class="tab-pane">
-      <div class="dashboard-cards" style="margin-bottom: var(--spacing-lg);">
-        <div class="card card-featured">
-          <h3>Patrimônio Investido</h3>
-          <p class="h2">R$ <span id="inv-total">0,00</span></p>
-        </div>
-        <div class="card">
-          <h3 class="text-muted">Distribuição (Por Tipo)</h3>
-          <div style="position: relative; height:120px; width:100%; margin-top: var(--spacing-sm);">
-            <canvas id="investmentsChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Ativo</th>
-                <th>Tipo</th>
-                <th>Data Aplicação</th>
-                <th>Vencimento</th>
-                <th>Indexador / Taxa</th>
-                <th>Valor Investido</th>
-                <th style="width: 80px; text-align: center;">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="lista-investimentos">
-              <!-- Renderizado via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: Desempenho e Cotações -->
-    <div id="tab-desempenho" class="tab-pane" style="display: none;">
-      <div class="card mb-4">
-        <h3>Filtros de Análise</h3>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-          <select id="filtro-tipo" class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
-            <option value="todos">Todos os Tipos</option>
-            <option value="Renda Fixa">Renda Fixa</option>
-            <option value="Renda Variável">Renda Variável</option>
-            <option value="FIIs">Fundos Imobiliários</option>
-          </select>
-          <select id="filtro-corretora" class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
-            <option value="todas">Todas as Corretoras</option>
-            <option value="nu">Nubank</option>
-            <option value="inter">Banco Inter</option>
-            <option value="xp">XP Investimentos</option>
-          </select>
-          <button class="btn btn-outline" id="btn-aplicar-filtros" style="flex: 1; min-width: 150px; padding: 0.75rem;">Aplicar Filtros</button>
-        </div>
-      </div>
-
-      <div class="dashboard-cards mb-4">
-        <div class="card">
-          <h3>Evolução do Rendimento</h3>
-          <div style="position: relative; height:250px; width:100%; margin-top: var(--spacing-sm);">
-            <canvas id="performanceChart"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Cotações em Tempo Real (Média do Dia) <span style="display:inline-block; width:10px; height:10px; background:var(--error-color); border-radius:50%; animation: pulse 2s infinite; margin-left: 0.5rem;" title="AO VIVO"></span></h3>
-          <p class="text-muted text-meta">Pregão B3 (Simulado)</p>
-          <div class="table-responsive mt-4">
-            <table class="data-table">
-              <thead><tr><th>Ativo</th><th>Preço Médio</th><th>Variação</th></tr></thead>
-              <tbody id="lista-cotacoes"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: Matriz de Análise -->
-    <div id="tab-matriz" class="tab-pane" style="display: none;">
-      <p class="mb-4 text-muted">Orientações de mercado para auxiliar na escolha dos seus ativos baseados no seu perfil de investidor.</p>
-      <div class="dashboard-cards">
-        <div class="card" style="border-top: 4px solid var(--success-color);">
-          <h3>🛡️ Conservador (Buy & Hold)</h3>
-          <p class="text-muted text-meta mt-2">Foco em empresas sólidas e proventos (Dividendos).</p>
-          <ul style="margin-top:1rem; padding-left:1.5rem; font-size:var(--text-body); color: var(--text-muted);">
-            <li style="margin-bottom:0.5rem"><strong>P/L Histórico &lt; 15</strong> (Preço/Lucro atrativo)</li>
-            <li style="margin-bottom:0.5rem"><strong>Dividend Yield &gt; 6% a.a.</strong></li>
-            <li style="margin-bottom:0.5rem"><strong>Dívida Líquida / EBITDA &lt; 2.0x</strong></li>
-            <li style="margin-bottom:0.5rem"><strong>ROE</strong> (Retorno sobre Patrimônio) &gt; 10%</li>
-            <li style="margin-bottom:0.5rem">Setores perenes: Bancos, Seguros, Energia.</li>
-          </ul>
-        </div>
-        <div class="card" style="border-top: 4px solid var(--info-color);">
-          <h3>🚀 Arrojado (Growth)</h3>
-          <p class="text-muted text-meta mt-2">Foco em valorização de capital e teses de crescimento.</p>
-          <ul style="margin-top:1rem; padding-left:1.5rem; font-size:var(--text-body); color: var(--text-muted);">
-            <li style="margin-bottom:0.5rem"><strong>Crescimento Receita YoY &gt; 20%</strong></li>
-            <li style="margin-bottom:0.5rem"><strong>CAGR de Lucros Altos</strong></li>
-            <li style="margin-bottom:0.5rem">Setores: Tecnologia, Varejo Online, Saúde.</li>
-            <li style="margin-bottom:0.5rem">Múltiplos esticados (P/L &gt; 25 é aceitável se crescer rápido).</li>
-            <li style="margin-bottom:0.5rem"><strong>Beta &gt; 1</strong> (Volatilidade Maior).</li>
-          </ul>
-        </div>
-        <div class="card" style="border-top: 4px solid var(--error-color);">
-          <h3>⚡ Day Trade / Swing Trade</h3>
-          <p class="text-muted text-meta mt-2">Foco em fluxo de tela, derivativos e análise técnica.</p>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </template>
-
-  <!-- Formulário de Nova Assinatura -->
-  <template id="tpl-form-assinatura">
-    <form id="form-assinatura">
-      <div class="form-group">
-        <label class="form-label">Nome do Serviço</label>
-        <input type="text" id="a-nome" required placeholder="Ex: Netflix, Spotify, AWS">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Valor Mensal (R$)</label>
-        <input type="number" id="a-valor" step="0.01" required placeholder="0.00">
-      </div>
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Dia do Vencimento</label>
-          <input type="number" id="a-dia" min="1" max="31" required placeholder="Ex: 15">
-        </div>
-        <div class="form-group" style="flex: 2;">
-          <label class="form-label">Cartão / Forma PG</label>
-          <select id="a-forma-pg" required>
-            <option value="Nubank">Cartão Nubank</option>
-            <option value="Itaú">Cartão Itaú</option>
-            <option value="Pix">PIX Recorrente</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Status da Assinatura</label>
-        <select id="a-status" required>
-          <option value="Ativo">Ativo (Cobrando todo mês)</option>
-          <option value="Pausado">Pausado / Cancelado</option>
-        </select>
-      </div>
-      <button type="submit" class="btn mt-4">Salvar Assinatura</button>
-    </form>
-  </template>
-  <!-- Formulário de Novo Investimento -->
-  <template id="tpl-form-investimento">
-    <form id="form-investimento">
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 2;">
-          <label class="form-label">Ativo (Ticker/Nome)</label>
-          <input type="text" id="i-ativo" required placeholder="Ex: PETR4, Tesouro Selic 2029">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Tipo</label>
-          <select id="i-tipo" required></select>
-        </div>
-      </div>
-      
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Valor do Aporte (R$)</label>
-          <input type="number" id="i-valor" step="0.01" required placeholder="0.00">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">Data da Aplicação</label>
-          <input type="date" id="i-data-app" required>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 1rem;">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label text-muted">Indexador</label>
-          <select id="i-indexador">
-            <option value="Pré-fixado">Pré-fixado</option>
-            <option value="CDI">CDI</option>
-            <option value="IPCA">IPCA</option>
-            <option value="Selic">Selic</option>
-            <option value="Ações/FIIs">Renda Variável</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label text-muted">Taxa Contratada (%)</label>
-          <input type="number" id="i-taxa" step="0.01" placeholder="Ex: 110 (110% CDI)">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label text-muted">Vencimento</label>
-          <input type="date" id="i-vencimento">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Conta (Corretora / Banco)</label>
-        <select id="i-conta" required></select>
-      </div>
-
-      <button type="submit" class="btn mt-4">Salvar Investimento</button>
-    </form>
-  </template>
-  <!-- Template: Configurações -> Perfil do Titular -->
-  <template id="tpl-config-perfil">
-    <div class="view-header">
-      <h1>Perfil do Titular</h1>
-    </div>
-    <div class="card mt-4" style="max-width: 600px;">
-      <form id="form-perfil">
-        <div class="form-group">
-          <label class="form-label">Nome Completo</label>
-          <input type="text" id="perfil-nome" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">E-mail de Acesso</label>
-          <input type="email" id="perfil-email" disabled class="text-muted">
-        </div>
-        <button type="button" class="btn mt-4">Salvar Alterações</button>
-      </form>
-    </div>
-  </template>
-
-  <!-- Template: Configurações -> Dependentes -->
-  <template id="tpl-config-dependentes">
-    <div class="view-header">
-      <h1>Dependentes e Subcontas</h1>
-      <button class="btn" data-action="novo-dependente">Convidar Membro</button>
-    </div>
-    <div class="card mt-4">
-      <p class="text-muted mb-4">Compartilhe o acesso da sua conta com familiares. Eles terão um login próprio e você define o nível de permissão deles.</p>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>E-mail</th>
-              <th>Nível de Acesso</th>
-              <th style="width: 100px; text-align: center;">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-dependentes">
-            <tr><td colspan="4" class="text-center text-muted">Nenhum dependente cadastrado no seu plano.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <!-- Template: Configurações -> Assinatura -->
-  <template id="tpl-config-assinatura">
-    <div class="view-header">
-      <h1>Assinatura e Faturamento</h1>
-    </div>
-    <div class="card mt-4" style="max-width: 600px;">
-      <h3>Seu Plano Atual</h3>
-      <div class="upsell-container mt-4" style="background: var(--bg-color); border: 1px solid var(--border-color); padding: var(--spacing-lg);">
-        <h2 id="plan-name" style="color: var(--primary-color); text-transform: uppercase;">Carregando...</h2>
-        <p class="text-muted mt-4">Status da Assinatura: <strong style="color: var(--success-color);">Ativo</strong></p>
-        <hr style="margin: 1rem 0; border: 0; border-top: 1px solid var(--border-color);">
-        <p class="text-muted"><strong>Módulos liberados:</strong> <span id="plan-modules">...</span></p>
-      </div>
-      
-      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-        <button class="btn" style="flex: 1;">Fazer Upgrade</button>
-        <button class="btn btn-outline" style="flex: 1; border-color: var(--error-color); color: var(--error-color);">Cancelar Plano</button>
-      </div>
-    </div>
-    
-    <div class="card mt-4" style="max-width: 600px;">
-      <h3>Histórico de Faturamento</h3>
-      <div class="table-responsive mt-4">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Valor</th>
-              <th>Status</th>
-              <th>Recibo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="4" class="text-center text-muted">Nenhum faturamento registrado.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </template>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/store.js"></script>
-  <script src="js/router.js"></script>
-  <script src="js/modules/budget.js"></script>
-  <script src="js/modules/dashboard.js"></script>
-  <script src="js/modules/config.js"></script>
-  <script src="js/modules/faturas.js"></script>
-  <script src="js/modules/assinaturas.js"></script>
-  <script src="js/modules/investimentos.js"></script>
-  <script src="js/modules/metas.js"></script>
-  <script src="js/modules/relatorios.js"></script>
-  <script src="js/modules/tools.js"></script>
-  <script src="js/modules/irpf.js"></script>
-  <script src="js/main.js"></script>
+    renderSession();
+  </script>
 </body>
 </html>

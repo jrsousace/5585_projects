@@ -45,31 +45,55 @@ function renderTransactionsTable(transactions) {
   
   transactions.forEach(t => {
     const tr = document.createElement('tr');
-    
-    // Formatando valores e data
     const date = new Date(t.data_vencimento).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
     const value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.valor_total);
     const valueColor = t.tipo === 'despesa' ? 'var(--error-color)' : 'var(--success-color)';
     const formaPg = t.forma_pagamento || '-';
-    
-    tr.innerHTML = `
-      <td>
-        ${date}
-        ${t.transacao_status === 'atrasado' ? '<br><small style="color:var(--error-color)">Atrasado</small>' : ''}
-        ${t.transacao_status === 'pendente' ? '<br><small style="color:var(--warning-color)">Pendente</small>' : ''}
-      </td>
-      <td>${t.descricao}</td>
-      <td>${t.categoria || '-'}</td>
-      <td>${formaPg}</td>
-      <td style="color: ${valueColor}">${value}</td>
-      <td style="white-space: nowrap;">
-        ${(t.transacao_status === 'pendente' || t.transacao_status === 'atrasado') 
-          ? `<button class="btn btn-outline" style="padding: 0.25rem 0.5rem; min-height: auto; color: var(--success-color); border-color: var(--success-color); margin-right: 0.25rem;" data-action="pagar-transacao" data-id="${t.id_transacao}" data-valor="${t.valor_total}" title="Tornar Pago">✔️ Pago</button>` 
-          : ''}
-        <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; min-height: auto;" data-action="edit-transacao" data-id="${t.id_transacao}">✏️</button>
-      </td>
-    `;
-    
+
+    const appendCell = (text, className) => {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      if (className) cell.className = className;
+      tr.appendChild(cell);
+      return cell;
+    };
+    const dateCell = appendCell(date);
+    if (t.transacao_status === 'atrasado' || t.transacao_status === 'pendente') {
+      const status = document.createElement('small');
+      status.textContent = t.transacao_status === 'atrasado' ? 'Atrasado' : 'Pendente';
+      status.style.color = t.transacao_status === 'atrasado'
+        ? 'var(--error-color)'
+        : 'var(--warning-color)';
+      dateCell.appendChild(document.createElement('br'));
+      dateCell.appendChild(status);
+    }
+    appendCell(t.descricao || '');
+    appendCell(t.categoria || '-');
+    appendCell(formaPg);
+    const valueCell = appendCell(value);
+    valueCell.style.color = valueColor;
+    const actionsCell = document.createElement('td');
+    actionsCell.style.whiteSpace = 'nowrap';
+    if (t.transacao_status === 'pendente' || t.transacao_status === 'atrasado') {
+      const payButton = document.createElement('button');
+      payButton.className = 'btn btn-outline';
+      payButton.style.cssText = 'padding: 0.25rem 0.5rem; min-height: auto; color: var(--success-color); border-color: var(--success-color); margin-right: 0.25rem;';
+      payButton.dataset.action = 'pagar-transacao';
+      payButton.dataset.id = t.id_transacao;
+      payButton.dataset.valor = t.valor_total;
+      payButton.title = 'Tornar Pago';
+      payButton.textContent = '✔️ Pago';
+      actionsCell.appendChild(payButton);
+    }
+    const editButton = document.createElement('button');
+    editButton.className = 'btn btn-outline';
+    editButton.style.cssText = 'padding: 0.25rem 0.5rem; min-height: auto;';
+    editButton.dataset.action = 'edit-transacao';
+    editButton.dataset.id = t.id_transacao;
+    editButton.textContent = '✏️';
+    actionsCell.appendChild(editButton);
+    tr.appendChild(actionsCell);
+
     fragment.appendChild(tr);
   });
   

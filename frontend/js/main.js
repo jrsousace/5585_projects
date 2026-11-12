@@ -1,15 +1,33 @@
 // main.js - Core da aplicação
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 1. Verificar se está logado
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    window.location.href = 'login.html';
+  const session = getActiveSession();
+  if (!session) {
+    window.location.href = '/login';
     return;
   }
 
+  try {
+    const active = await appState.refreshSession();
+    if (!active) {
+      window.location.href = '/login';
+      return;
+    }
+  } catch (error) {
+    console.error('Não foi possível atualizar o plano da conta:', error);
+    if (appState.dataMode() === 'cloud') {
+      appState.user.subscription.active = false;
+    }
+  }
+
   // 2. Preencher dados do usuário
-  document.getElementById('user-name').textContent = appState.user.name;
+  document.getElementById('user-name').textContent = appState.user.name || appState.user.email;
+  const notice = document.getElementById('subscription-notice');
+  if (appState.dataMode() === 'readonly' && appState.user.subscription.plan === 'pro') {
+    notice.hidden = false;
+    notice.textContent = 'Sua assinatura não está vigente. Os dados salvos na nuvem permanecem disponíveis somente para leitura.';
+  }
 
   // 3. Renderização Condicional da Navegação (Fase 3)
   renderNavigation();
@@ -54,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Logout
   document.getElementById('btn-logout').addEventListener('click', () => {
     appState.clear();
-    window.location.href = 'login.html';
+    window.location.href = '/';
   });
 
   // Theme Toggle
@@ -163,6 +181,13 @@ function setupEventDelegation() {
   const appContainer = document.getElementById('app');
   
   appContainer.addEventListener('click', (e) => {
+    if (appState.dataMode() === 'readonly' &&
+      e.target.closest('[data-action^="nova-"], [data-action^="novo-"], [data-action^="edit-"], [data-action^="editar-"], [data-action="pagar-transacao"]')) {
+      e.preventDefault();
+      alert('Sua assinatura não está vigente. Os dados na nuvem estão disponíveis somente para leitura.');
+      return;
+    }
+
     // Exemplo: Botão Nova Transação e Editar
     if (e.target.matches('[data-action="nova-transacao"]')) {
       abrirModalNovaTransacao();
@@ -232,9 +257,6 @@ function setupEventDelegation() {
     }
 
     // Botão de Upgrade
-    if (e.target.matches('.upsell-container .btn')) {
-      alert('Redirecionar para página de checkout (A ser implementado)');
-    }
   });
 }
 

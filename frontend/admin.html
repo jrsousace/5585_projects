@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2c">
+  <title>Gestão master - 5585 Projects</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.5 "Segoe UI", sans-serif; background: #101b2c; color: #f3f7fc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header, main { width: min(1120px, calc(100% - 32px)); margin: auto; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #314156; }
+    main { padding: 32px 0 64px; }
+    h1, h2, h3 { line-height: 1.2; }
+    .muted { color: #a9b8cb; }
+    .toolbar, .organization-header, .user-row, .subscription-form { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .toolbar { margin: 20px 0; }
+    input, select, button { font: inherit; border: 1px solid #52647b; border-radius: 8px; padding: 9px 12px; background: #17263a; color: inherit; }
+    input[type="search"] { flex: 1; min-width: 220px; }
+    button { cursor: pointer; }
+    button:hover { border-color: #61d6c5; }
+    button:disabled { cursor: wait; opacity: .65; }
+    .organization { margin: 18px 0; padding: 20px; border: 1px solid #314156; border-radius: 14px; background: #17263a; }
+    .organization-header { justify-content: space-between; align-items: flex-start; }
+    .organization-header h2 { margin: 0; }
+    .subscription-form { margin: 16px 0; }
+    .users { display: grid; gap: 8px; }
+    .user-row { justify-content: space-between; padding: 10px 0; border-top: 1px solid #314156; }
+    .user-info { min-width: 240px; }
+    .error { color: #ff9a9a; }
+    .success { color: #61d6c5; }
+    #message { min-height: 1.5em; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>5585 Projects · Gestão master</strong>
+    <a href="/">Voltar à prateleira</a>
+  </header>
+  <main>
+    <h1>Organizações, usuários e assinaturas</h1>
+    <p class="muted">Dados cadastrais sensíveis, como CPF e endereço, não são exibidos nesta tela.</p>
+    <p id="message" role="status" aria-live="polite"></p>
+    <div id="denied" hidden>
+      <p class="error">Acesso restrito à conta master.</p>
+      <a href="/login">Entrar com outra conta</a>
+    </div>
+    <section id="management" hidden>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Buscar organização, usuário ou e-mail" aria-label="Buscar organizações e usuários">
+        <button id="refresh" type="button">Atualizar lista</button>
+      </div>
+      <div id="organizations"></div>
+    </section>
+  </main>
+  <script src="js/session.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const message = document.getElementById('message');
+    const management = document.getElementById('management');
+    const organizationsContainer = document.getElementById('organizations');
+    let activeUser;
+    let searchTimer;
+
+    async function api(endpoint, options = {}) {
+      const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+        ...options,
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        cache: 'no-store'
+      });
+      if (response.status === 204) return null;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || `Erro HTTP ${response.status}`);
+      return result;
+    }
+
+    function setMessage(text, kind = '') {
+      message.textContent = text;
+      message.className = kind;
+    }
+
+    function appendText(parent, tag, text, className = '') {
+      const element = document.createElement(tag);
+      element.textContent = text || '';
+      if (className) element.className = className;
+      parent.appendChild(element);
+      return element;
+    }
+
+    function createOption(select, value, label) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    }
+
+    function renderOrganization(org) {
+      const card = document.createElement('article');
+      card.className = 'organization';
+      card.dataset.organizationId = org.id_organizacao;
+      const heading = document.createElement('div');
+      heading.className = 'organization-header';
+      const orgName = org.nome_fantasia || org.razao_social || org.nome;
+      const titleArea = document.createElement('div');
+      appendText(titleArea, 'h2', orgName);
+      appendText(
+        titleArea,
+        'p',
+        `${org.tipo_cadastro === 'pj' ? `CNPJ: ${org.cnpj || 'não informado'} · ` : ''}${org.id_organizacao}`,
+        'muted'
+      );
+      heading.appendChild(titleArea);
+      appendText(
+        heading,
+        'span',
+        `${org.assinatura_plano} · ${org.assinatura_status}${org.assinatura_expira_em ? ` · até ${new Date(org.assinatura_expira_em).toLocaleString('pt-BR')}` : ''}`
+      );
+      card.appendChild(heading);
+
+      const form = document.createElement('form');
+      form.className = 'subscription-form';
+      const plan = document.createElement('select');
+      plan.setAttribute('aria-label', 'Plano');
+      createOption(plan, 'basic', 'Gratuito');
+      createOption(plan, 'pro', 'PRO');
+      plan.value = org.assinatura_plano;
+      const status = document.createElement('select');
+      status.setAttribute('aria-label', 'Status da assinatura');
+      createOption(status, 'free', 'Gratuito');
+      createOption(status, 'active', 'Ativo');
+      createOption(status, 'expired', 'Expirado');
+      createOption(status, 'canceled', 'Cancelado');
+      status.value = org.assinatura_status;
+      const expiry = document.createElement('input');
+      expiry.type = 'datetime-local';
+      expiry.setAttribute('aria-label', 'Validade da assinatura');
+      if (org.assinatura_expira_em) {
+        const date = new Date(org.assinatura_expira_em);
+        expiry.value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      }
+      const save = document.createElement('button');
+      save.type = 'submit';
+      save.textContent = 'Salvar assinatura';
+      form.append(plan, status, expiry, save);
+      card.appendChild(form);
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const nextPlan = plan.value;
+        const nextStatus = nextPlan === 'basic' ? 'free' : status.value;
+        const nextExpiry = nextPlan === 'basic' || !expiry.value
+          ? null
+          : new Date(expiry.value).toISOString();
+        save.disabled = true;
+        try {
+          await api(`/admin/organizations/${encodeURIComponent(org.id_organizacao)}/subscription`, {
+            method: 'PUT',
+            body: JSON.stringify({ plan: nextPlan, status: nextStatus, expiresAt: nextExpiry })
+          });
+          setMessage('Assinatura atualizada e registrada na auditoria.', 'success');
+          await loadOrganizations();
+        } catch (error) {
+          setMessage(error.message, 'error');
+        } finally {
+          save.disabled = false;
+        }
+      });
+      plan.addEventListener('change', () => {
+        if (plan.value === 'basic') {
+          status.value = 'free';
+          expiry.value = '';
+        } else if (status.value === 'free') {
+          status.value = 'expired';
+        }
+      });
+
+      const usersTitle = appendText(card, 'h3', `Usuários (${org.users.length})`);
+      usersTitle.className = 'muted';
+      const users = document.createElement('div');
+      users.className = 'users';
+      org.users.forEach((user) => {
+        const row = document.createElement('div');
+        row.className = 'user-row';
+        const info = document.createElement('div');
+        info.className = 'user-info';
+        appendText(info, 'strong', user.name);
+        appendText(info, 'div', `${user.email} · ${user.role} · ${user.status}`, 'muted');
+        row.appendChild(info);
+        if (user.id !== activeUser.id) {
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.textContent = user.status === 'ativo' ? 'Desativar' : 'Reativar';
+          toggle.addEventListener('click', async () => {
+            toggle.disabled = true;
+            try {
+              await api(`/admin/users/${encodeURIComponent(user.id)}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({ active: user.status !== 'ativo' })
+              });
+              setMessage('Status do usuário atualizado e registrado na auditoria.', 'success');
+              await loadOrganizations();
+            } catch (error) {
+              setMessage(error.message, 'error');
+              toggle.disabled = false;
+            }
+          });
+          row.appendChild(toggle);
+        }
+        users.appendChild(row);
+      });
+      card.appendChild(users);
+
+      const auditButton = document.createElement('button');
+      auditButton.type = 'button';
+      auditButton.textContent = 'Ver histórico de alterações';
+      auditButton.addEventListener('click', async () => {
+        auditButton.disabled = true;
+        try {
+          const events = await api(`/admin/organizations/${encodeURIComponent(org.id_organizacao)}/audit`);
+          const list = document.createElement('div');
+          list.className = 'users';
+          if (events.length === 0) appendText(list, 'p', 'Sem alterações registradas.', 'muted');
+          events.forEach((entry) => {
+            appendText(
+              list,
+              'p',
+              `${new Date(entry.created_at).toLocaleString('pt-BR')} · ${entry.type} · ${entry.action} · ${entry.actor || 'Sistema'} · ${JSON.stringify(entry.previous_state)} → ${JSON.stringify(entry.new_state)}`,
+              'muted'
+            );
+          });
+          const previous = card.querySelector('[data-audit-list]');
+          if (previous) previous.remove();
+          list.dataset.auditList = 'true';
+          card.appendChild(list);
+        } catch (error) {
+          setMessage(error.message, 'error');
+        } finally {
+          auditButton.disabled = false;
+        }
+      });
+      card.appendChild(auditButton);
+      return card;
+    }
+
+    async function loadOrganizations() {
+      const query = document.getElementById('search').value.trim();
+      const organizations = await api(`/admin/organizations?search=${encodeURIComponent(query)}`);
+      organizationsContainer.replaceChildren(...organizations.map(renderOrganization));
+      if (organizations.length === 0) setMessage('Nenhuma organização encontrada.');
+    }
+
+    async function initialize() {
+      const session = getActiveSession();
+      if (!session) {
+        window.location.replace('/login');
+        return;
+      }
+      if (session.user.accessRole !== 'master') {
+        document.getElementById('denied').hidden = false;
+        return;
+      }
+      activeUser = session.user;
+      management.hidden = false;
+      try {
+        await loadOrganizations();
+      } catch (error) {
+        setMessage(error.message, 'error');
+      }
+    }
+
+    document.getElementById('refresh').addEventListener('click', () => {
+      loadOrganizations().catch((error) => setMessage(error.message, 'error'));
+    });
+    document.getElementById('search').addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        loadOrganizations().catch((error) => setMessage(error.message, 'error'));
+      }, 250);
+    });
+    initialize();
+  </script>
+</body>
+</html>

@@ -24,7 +24,7 @@ const router = {
     '/cadastros/formas-pgto': { templateId: 'tpl-cadastros-simples', title: 'Formas de Pagamento', module: null },
     '/cadastros/tipos-invest': { templateId: 'tpl-cadastros-simples', title: 'Tipos de Investimento', module: null },
     '/config/perfil': { templateId: 'tpl-config-perfil', title: 'Perfil do Titular', module: null },
-    '/config/dependentes': { templateId: 'tpl-config-dependentes', title: 'Dependentes', module: 'premium' },
+    '/config/dependentes': { templateId: 'tpl-config-dependentes', title: 'Dependentes', module: null },
     '/config/assinatura': { templateId: 'tpl-config-assinatura', title: 'Assinatura', module: null }
   },
 

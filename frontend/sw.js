@@ -1,8 +1,11 @@
-const CACHE_NAME = 'finance-app-v3';
+const CACHE_NAME = '5585-projects-v7';
 const ASSETS_TO_CACHE = [
   '/',
-  '/index.html',
-  '/login.html',
+  '/admin',
+  '/financas',
+  '/login',
+  '/account-security',
+  '/aceitar-convite',
   '/manifest.json',
   '/assets/favicon.svg',
   '/assets/icon-192.svg',
@@ -10,12 +13,17 @@ const ASSETS_TO_CACHE = [
   '/css/main.css',
   '/css/dashboard.css',
   '/js/config.js',
+  '/js/registration-form.js',
   '/js/main.js',
   '/js/auth.js',
+  '/js/account-security.js',
+  '/js/session.js',
   '/js/router.js',
   '/js/store.js',
   '/js/modules/budget.js',
   '/js/modules/dashboard.js',
+  '/js/modules/organization.js',
+  '/js/accept-invitation.js',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
@@ -61,6 +69,9 @@ self.addEventListener('fetch', (event) => {
         });
       })
     );
+  } else if (['token', 'verify', 'reset'].some((parameter) =>
+    new URL(event.request.url).searchParams.has(parameter))) {
+    event.respondWith(fetch(event.request));
   } else {
     event.respondWith(
       caches.match(event.request)
@@ -86,7 +97,7 @@ self.addEventListener('fetch', (event) => {
           // Fallback final genérico (se estiver offline e sem cache)
           // Se for HTML, pode retornar a página inicial
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match('/');
           }
         })
     );

@@ -26,7 +26,7 @@
       border-radius: var(--radius-lg);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       width: 100%;
-      max-width: 400px;
+      max-width: 560px;
     }
     .login-header {
       text-align: center;
@@ -36,60 +36,144 @@
       color: var(--error-color);
       font-size: 0.875rem;
       margin-top: var(--spacing-xs);
-      display: none;
     }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <h1>Bem-vindo</h1>
-        <p class="text-muted">Faça login na sua conta</p>
+        <h1 id="login-title">Bem-vindo</h1>
+        <p class="text-muted" id="login-subtitle">Faça login na sua conta</p>
       </div>
-      
+
       <form id="login-form">
         <div class="form-group">
           <label class="form-label" for="email">E-mail</label>
-          <input type="email" id="email" name="email" required placeholder="seu@email.com">
+          <input type="email" id="email" name="email" autocomplete="email" maxlength="254" required placeholder="seu@email.com">
         </div>
         
         <div class="form-group">
           <label class="form-label" for="password">Senha</label>
-          <input type="password" id="password" name="password" required placeholder="••••••••">
-          <div id="login-error" class="error-message">Credenciais inválidas.</div>
+          <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="••••••••">
         </div>
         
         <button type="submit" class="btn mt-4">Entrar</button>
-        <button type="button" class="btn btn-outline mt-4" style="margin-top: 10px;" id="btn-show-register">Criar Conta</button>
+        <p class="mt-2"><a href="/account-security">Esqueci minha senha</a></p>
+        <button type="button" class="btn btn-outline mt-2" id="btn-resend-verification" hidden>Reenviar confirmação de e-mail</button>
+        <div id="resend-verification-message" class="text-muted" role="status" aria-live="polite"></div>
+        <p id="login-error" class="error-message" role="alert" hidden>Credenciais inválidas.</p>
+        <button type="button" class="btn btn-outline mt-4" style="margin-top: 10px;" id="btn-show-register">Criar conta</button>
       </form>
 
-      <!-- Formulário de Registro (Inicia Escondido) -->
-      <form id="register-form" style="display: none;">
+      <form id="register-form" hidden>
+        <p class="text-muted">Os dados são usados para criar seu cadastro e mantidos na sua conta. Informe os dados do titular ou representante legal.</p>
+        <fieldset class="form-group">
+          <legend class="form-label">Tipo de cadastro</legend>
+          <label><input type="radio" name="tipo_cadastro" value="pf" checked> Pessoa Física</label>
+          <label style="margin-left: 1rem;"><input type="radio" name="tipo_cadastro" value="pj"> Pessoa Jurídica</label>
+        </fieldset>
+
         <div class="form-group">
-          <label class="form-label" for="reg-name">Nome Completo</label>
-          <input type="text" id="reg-name" required placeholder="Seu Nome">
+          <label class="form-label" for="reg-name">Nome completo do titular / representante legal</label>
+          <input type="text" id="reg-name" name="name" autocomplete="name" maxlength="120" required placeholder="Seu nome">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-cpf">CPF do titular / representante legal</label>
+          <input type="text" id="reg-cpf" name="cpf" inputmode="numeric" autocomplete="off" maxlength="14" required placeholder="000.000.000-00">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-birth-date">Data de nascimento</label>
+          <input type="date" id="reg-birth-date" name="birthDate" autocomplete="bday" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-phone">Celular</label>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span aria-label="Código internacional do Brasil">+55</span>
+            <input type="tel" id="reg-phone" name="phone" inputmode="numeric" autocomplete="tel-national" maxlength="11" pattern="[0-9]{11}" required placeholder="DDD e 9 dígitos">
+          </div>
+          <small class="text-muted">O código 55 já está incluído; informe DDD e número (11 dígitos).</small>
         </div>
         
         <div class="form-group">
           <label class="form-label" for="reg-email">E-mail</label>
-          <input type="email" id="reg-email" required placeholder="seu@email.com">
+          <input type="email" id="reg-email" name="email" autocomplete="email" maxlength="254" required placeholder="seu@email.com">
         </div>
+
+        <fieldset class="form-group">
+          <legend class="form-label">Endereço completo</legend>
+          <label class="form-label" for="reg-street">Logradouro</label>
+          <input type="text" id="reg-street" name="street" autocomplete="address-line1" maxlength="160" required>
+          <div style="display: grid; grid-template-columns: minmax(90px, 1fr) 2fr; gap: 0.75rem;">
+            <div>
+              <label class="form-label" for="reg-number">Número</label>
+              <input type="text" id="reg-number" name="number" autocomplete="address-line2" maxlength="20" required>
+            </div>
+            <div>
+              <label class="form-label" for="reg-complement">Complemento (opcional)</label>
+              <input type="text" id="reg-complement" name="complement" maxlength="100">
+            </div>
+          </div>
+          <label class="form-label" for="reg-neighborhood">Bairro</label>
+          <input type="text" id="reg-neighborhood" name="neighborhood" autocomplete="address-level3" maxlength="100" required>
+          <label class="form-label" for="reg-city">Município</label>
+          <input type="text" id="reg-city" name="city" autocomplete="address-level2" maxlength="100" required>
+          <div style="display: grid; grid-template-columns: minmax(100px, 1fr) 2fr; gap: 0.75rem;">
+            <div>
+              <label class="form-label" for="reg-state">UF</label>
+              <select id="reg-state" name="state" autocomplete="address-level1" required>
+                <option value="">Selecione</option>
+                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+                <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+                <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+                <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+                <option>SE</option><option>TO</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="reg-cep">CEP</label>
+              <input type="text" id="reg-cep" name="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" required placeholder="00000-000">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset id="business-fields" class="form-group" hidden>
+          <legend class="form-label">Dados da pessoa jurídica</legend>
+          <label class="form-label" for="reg-cnpj">CNPJ (14 caracteres)</label>
+          <input type="text" id="reg-cnpj" name="cnpj" maxlength="14" autocomplete="off" placeholder="Somente números ou letras e números">
+          <small class="text-muted">CNPJs alfanuméricos também são aceitos.</small>
+          <label class="form-label" for="reg-legal-name">Razão Social</label>
+          <input type="text" id="reg-legal-name" name="legalName" maxlength="255">
+          <label class="form-label" for="reg-trade-name">Nome Fantasia</label>
+          <input type="text" id="reg-trade-name" name="tradeName" maxlength="255">
+        </fieldset>
         
         <div class="form-group">
           <label class="form-label" for="reg-password">Senha</label>
-          <input type="password" id="reg-password" required placeholder="••••••••">
-          <div id="register-error" class="error-message">Erro ao criar conta.</div>
-          <div id="register-success" class="error-message" style="color: var(--success-color);">Conta criada com sucesso! Faça login.</div>
+          <input type="password" id="reg-password" name="password" autocomplete="new-password" minlength="12" maxlength="72" aria-describedby="password-requirement" required placeholder="Mínimo de 12 caracteres">
+          <small id="password-requirement" class="text-muted">Use pelo menos 12 caracteres.</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password-confirm">Confirme a senha</label>
+          <input type="password" id="reg-password-confirm" name="password-confirm" autocomplete="new-password" minlength="12" maxlength="72" required placeholder="Digite a senha novamente">
+          <div id="register-error" class="error-message" role="alert" hidden></div>
+          <div id="register-success" class="error-message" role="status" style="color: var(--success-color);" hidden></div>
         </div>
         
         <button type="submit" class="btn mt-4">Registrar</button>
-        <button type="button" class="btn btn-outline mt-4" style="margin-top: 10px;" id="btn-show-login">Já tenho conta</button>
+        <button type="button" class="btn btn-outline mt-4" style="margin-top: 10px;" id="btn-show-login">Já tenho uma conta</button>
       </form>
     </div>
   </div>
 
   <script src="js/config.js"></script>
+  <script src="js/registration-form.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>

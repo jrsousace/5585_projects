@@ -1,8 +1,8 @@
 {
-  "name": "SaaS Financeiro",
-  "short_name": "FinanceApp",
-  "description": "Controle financeiro e investimentos sob medida.",
-  "start_url": "/index.html",
+  "name": "5585 Projects",
+  "short_name": "5585 Projects",
+  "description": "Acesse seus sistemas de gestão em nuvem.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",
